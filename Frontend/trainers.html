@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainers - Elite Gym</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #800020;      /* Burgundy */
+            --secondary-color: #a52a2a;     /* Lighter Burgundy */
+            --accent-color: #e6b8af;        /* Light Burgundy Accent */
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover:after, .navbar-nav .nav-link.active:after {
+            width: 70%;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Filters Section */
+        .filter-card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: none;
+            margin-bottom: 30px;
+        }
+        
+        .filter-card .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.25);
+        }
+        
+        .btn-reset {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-reset:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Trainer Cards */
+        .trainer-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+        }
+        
+        .trainer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+        }
+        
+        .trainer-image {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .trainer-content {
+            padding: 20px;
+        }
+        
+        .trainer-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .trainer-specialty {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .trainer-bio {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+        
+        .trainer-experience {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .trainer-experience i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .btn-trainer {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-trainer:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        /* Pagination */
+        .pagination {
+            margin-top: 30px;
+        }
+        
+        .page-link {
+            color: var(--primary-color);
+            border-radius: 8px;
+            margin: 0 3px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .page-link:hover {
+            color: var(--secondary-color);
+            background-color: var(--accent-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+            border-bottom: none;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+        }
+        
+        .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        .trainer-detail-image {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .list-group-item {
+            border: none;
+            padding: 10px 0;
+        }
+        
+        .list-group-item:not(:last-child) {
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 70px 0 20px;
+            margin-top: 80px;
+        }
+        
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-text {
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+        
+        .contact-info i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+        
+        /* Loading Spinner */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .spinner-border {
+            color: var(--primary-color) !important;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        
+        .alert-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+        
+        .alert-danger {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 40px 0;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .trainer-image {
+                height: 200px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-lightning-charge-fill"></i> Elite Gym
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="classes.html">Classes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sessions.html">Online Sessions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="trainers.html">Trainers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pricing.html">Membership</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="shop.html">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> Account
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title">Our Expert Trainers</h1>
+            <p class="page-subtitle">Meet our team of certified female fitness professionals dedicated to helping you achieve your goals</p>
+        </div>
+    </div>
+  
+    <!-- Main Content -->
+    <main class="container mb-5">
+        <!-- Trainer Filters -->
+        <div class="card filter-card">
+            <div class="card-body">
+                <h5 class="card-title">Filter Trainers</h5>
+                <form id="filter-form" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="specialization-filter" class="form-label">Specialization</label>
+                        <select class="form-select" id="specialization-filter">
+                            <option value="">All Specializations</option>
+                            <option value="Yoga">Yoga</option>
+                            <option value="Pilates">Pilates</option>
+                            <option value="HIIT">HIIT</option>
+                            <option value="Strength">Strength Training</option>
+                            <option value="Cardio">Cardio</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="experience-filter" class="form-label">Experience</label>
+                        <select class="form-select" id="experience-filter">
+                            <option value="">Any Experience</option>
+                            <option value="1-3">1-3 Years</option>
+                            <option value="3-5">3-5 Years</option>
+                            <option value="5+">5+ Years</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-reset w-100" id="reset-filters">Reset Filters</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Trainers Grid -->
+        <div class="row g-4" id="trainers-container">
+            <div class="col-12 text-center">
+                <div class="spinner-container">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Trainers pagination" class="mt-4">
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Pagination will be added dynamically -->
+            </ul>
+        </nav>
+    </main>
+    
+    <!-- Trainer Details Modal -->
+    <div class="modal fade" id="trainerModal" tabindex="-1" aria-labelledby="trainerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trainerModalLabel">Trainer Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="trainer-details">
+                    <!-- Trainer details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="view-classes-btn">View Classes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-title">Elite Gym</h5>
+                    <p class="footer-text">Empowering women through fitness and wellness.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="sessions.html">Online Sessions</a></li>
+                        <li><a href="trainers.html">Trainers</a></li>
+                        <li><a href="pricing.html">Membership Plans</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Contact Us</h5>
+                    <div class="contact-info">
+                        <p><i class="bi bi-geo-alt"></i> 123 Fitness Street, Health City, HC 12345</p>
+                        <p><i class="bi bi-telephone"></i> (123) 456-7890</p>
+                        <p><i class="bi bi-envelope"></i> info@elitegym.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Elite Gym. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // DOM elements
+            const trainersContainer = document.getElementById('trainers-container');
+            const pagination = document.getElementById('pagination');
+            const specializationFilter = document.getElementById('specialization-filter');
+            const experienceFilter = document.getElementById('experience-filter');
+            const resetFiltersBtn = document.getElementById('reset-filters');
+            const trainerModal = new bootstrap.Modal(document.getElementById('trainerModal'));
+            const trainerDetails = document.getElementById('trainer-details');
+            const viewClassesBtn = document.getElementById('view-classes-btn');
+            
+            // Global variables
+            let allTrainers = [];
+            let filteredTrainers = [];
+            const itemsPerPage = 6;
+            let currentPage = 1;
+            let currentTrainer = null;
+            
+            // Helper function to construct image URLs
+            function getImageUrl(imagePath) {
+                if (!imagePath) return 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80';
+                
+                // Check if the imagePath is already a full URL
+                if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+                    return imagePath;
+                }
+                
+                // Use the API base URL for relative paths
+                return `https://localhost:7182/${imagePath}`;
+            }
+            
+            // Load trainers
+            async function loadTrainers() {
+                try {
+                    trainersContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <div class="spinner-container">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    allTrainers = await apiService.getTrainers();
+                    filteredTrainers = [...allTrainers];
+                    
+                    renderTrainers();
+                    renderPagination();
+                } catch (error) {
+                    console.error('Error loading trainers:', error);
+                    trainersContainer.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-warning">Unable to load trainers at this time. Please try again later.</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Filter trainers
+            function filterTrainers() {
+                const specializationValue = specializationFilter.value;
+                const experienceValue = experienceFilter.value;
+                
+                filteredTrainers = allTrainers.filter(trainer => {
+                    // Specialization filter
+                    if (specializationValue && trainer.specialization !== specializationValue) {
+                        return false;
+                    }
+                    
+                    // Experience filter
+                    if (experienceValue) {
+                        const experience = trainer.experienceYears;
+                        
+                        switch (experienceValue) {
+                            case '1-3':
+                                if (experience < 1 || experience > 3) return false;
+                                break;
+                            case '3-5':
+                                if (experience < 3 || experience > 5) return false;
+                                break;
+                            case '5+':
+                                if (experience < 5) return false;
+                                break;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                // Reset to first page and render
+                currentPage = 1;
+                renderTrainers();
+                renderPagination();
+            }
+            
+            // Render trainers
+            function renderTrainers() {
+                // Calculate pagination
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedTrainers = filteredTrainers.slice(startIndex, endIndex);
+                
+                // Clear container
+                trainersContainer.innerHTML = '';
+                
+                if (paginatedTrainers.length === 0) {
+                    trainersContainer.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-info">No trainers match your selected filters.</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Render each trainer
+                paginatedTrainers.forEach(trainer => {
+                    const trainerCard = `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card trainer-card">
+                                <img src="${getImageUrl(trainer.imageUrl)}" class="card-img-top trainer-image" alt="${trainer.name}" onerror="this.src='https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                                <div class="card-body trainer-content">
+                                    <h5 class="card-title trainer-name">${trainer.name}</h5>
+                                    <p class="trainer-specialty">${trainer.specialization}</p>
+                                    <p class="card-text trainer-bio">${trainer.bio ? trainer.bio.substring(0, 100) + '...' : 'No bio available'}</p>
+                                    <div class="trainer-experience">
+                                        <i class="bi bi-award"></i> ${trainer.experienceYears} years experience
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <button class="btn btn-trainer w-100 view-trainer-btn" data-trainer-id="${trainer.id}">View Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    trainersContainer.innerHTML += trainerCard;
+                });
+                
+                // Add event listeners to buttons
+                document.querySelectorAll('.view-trainer-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const trainerId = this.getAttribute('data-trainer-id');
+                        const trainer = allTrainers.find(t => t.id == trainerId);
+                        if (trainer) {
+                            showTrainerDetails(trainer);
+                        }
+                    });
+                });
+            }
+            
+            // Render pagination
+            function renderPagination() {
+                const totalPages = Math.ceil(filteredTrainers.length / itemsPerPage);
+                
+                // Clear pagination
+                pagination.innerHTML = '';
+                
+                if (totalPages <= 1) return;
+                
+                // Previous button
+                const prevDisabled = currentPage === 1 ? 'disabled' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${prevDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const active = i === currentPage ? 'active' : '';
+                    pagination.innerHTML += `
+                        <li class="page-item ${active}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                // Next button
+                const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${nextDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                // Add event listeners
+                pagination.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const page = parseInt(this.getAttribute('data-page'));
+                        if (page > 0 && page <= totalPages) {
+                            currentPage = page;
+                            renderTrainers();
+                            renderPagination();
+                            
+                            // Scroll to top of trainers
+                            document.querySelector('.container.mb-5').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                });
+            }
+            
+            // Show trainer details
+            async function showTrainerDetails(trainer) {
+                currentTrainer = trainer;
+                
+                try {
+                    // Get trainer classes and sessions
+                    const [classes, sessions] = await Promise.all([
+                        apiService.getTrainerClasses(trainer.id),
+                        apiService.getTrainerSessions(trainer.id)
+                    ]);
+                    
+                    trainerDetails.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-4">
+                                <img src="${getImageUrl(trainer.imageUrl)}" class="img-fluid rounded trainer-detail-image" alt="${trainer.name}" onerror="this.src='https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'">
+                            </div>
+                            <div class="col-md-8">
+                                <h4>${trainer.name}</h4>
+                                <p class="text-primary">${trainer.specialization}</p>
+                                <p><strong>Experience:</strong> ${trainer.experienceYears} years</p>
+                                <p><strong>Certifications:</strong> ${trainer.certifications || 'N/A'}</p>
+                                <p>${trainer.bio || 'No bio available'}</p>
+                                
+                                <h5 class="mt-4">Classes</h5>
+                                ${classes.length > 0 ? `
+                                    <ul class="list-group list-group-flush mb-3">
+                                        ${classes.slice(0, 3).map(cls => `
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                ${cls.name}
+                                                <a href="class-details.html?id=${cls.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                    ${classes.length > 3 ? `<p><a href="classes.html?trainer=${trainer.id}">View all classes</a></p>` : ''}
+                                ` : '<p>No classes available</p>'}
+                                
+                                <h5>Online Sessions</h5>
+                                ${sessions.length > 0 ? `
+                                    <ul class="list-group list-group-flush">
+                                        ${sessions.slice(0, 3).map(session => `
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                ${session.name}
+                                                <a href="session-details.html?id=${session.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                    ${sessions.length > 3 ? `<p><a href="sessions.html?trainer=${trainer.id}">View all sessions</a></p>` : ''}
+                                ` : '<p>No online sessions available</p>'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    trainerModal.show();
+                } catch (error) {
+                    console.error('Error loading trainer details:', error);
+                    trainerDetails.innerHTML = `
+                        <div class="alert alert-danger">Error loading trainer details. Please try again later.</div>
+                    `;
+                    trainerModal.show();
+                }
+            }
+            
+            // View classes button
+            viewClassesBtn.addEventListener('click', function() {
+                if (currentTrainer) {
+                    window.location.href = `classes.html?trainer=${currentTrainer.id}`;
+                }
+            });
+            
+            // Add event listeners
+            specializationFilter.addEventListener('change', filterTrainers);
+            experienceFilter.addEventListener('change', filterTrainers);
+            resetFiltersBtn.addEventListener('click', function() {
+                specializationFilter.value = '';
+                experienceFilter.value = '';
+                filterTrainers();
+            });
+            
+            // Initial load
+            loadTrainers();
+        });
+    </script>
+</body>
+</html>

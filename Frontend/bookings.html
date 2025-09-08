@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Elite Gym</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #800020;      /* Burgundy */
+            --secondary-color: #a52a2a;     /* Lighter Burgundy */
+            --accent-color: #e6b8af;        /* Light Burgundy Accent */
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover:after, .navbar-nav .nav-link.active:after {
+            width: 70%;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: #f8f0f3 !important;
+            min-height: calc(100vh - 76px);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar .nav-link {
+            color: var(--text-dark) !important;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color) !important;
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: var(--primary-color);
+            color: #fff !important;
+        }
+        
+        .sidebar-heading {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-light);
+            padding: 10px 15px;
+            margin-top: 20px;
+        }
+        
+        /* Main Content Styles */
+        main {
+            background-color: #fff;
+            min-height: calc(100vh - 76px);
+            padding: 30px 20px;
+        }
+        
+        /* Card Styles */
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+        }
+        
+        .card-header {
+            background-color: var(--accent-color);
+            border-bottom: 1px solid var(--primary-color);
+            font-weight: 600;
+            color: var(--primary-color);
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-secondary {
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+        
+        /* Table Styles */
+        .table {
+            color: var(--text-dark);
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(230, 184, 175, 0.2);
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .booking-status {
+            font-weight: 500;
+        }
+        
+        .status-confirmed {
+            color: #198754;
+        }
+        
+        .status-cancelled {
+            color: #dc3545;
+        }
+        
+        .status-completed {
+            color: #0d6efd;
+        }
+        
+        /* Pagination Styles */
+        .page-link {
+            color: var(--primary-color);
+            border-radius: 30px;
+            margin: 0 2px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .page-link:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-header {
+            background-color: var(--accent-color);
+            border-bottom: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 10px 10px 0 0;
+        }
+        
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 70px 0 20px;
+            margin-top: 50px;
+        }
+        
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-text {
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        
+        /* Loading Spinner */
+        .spinner-border {
+            color: var(--primary-color) !important;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: fixed;
+                top: 76px;
+                left: -100%;
+                width: 280px;
+                height: calc(100vh - 76px);
+                z-index: 1000;
+                transition: all 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            main {
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-lightning-charge-fill"></i> Elite Gym
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="classes.html">Classes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sessions.html">Online Sessions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="trainers.html">Trainers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pricing.html">Membership</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="shop.html">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <span id="nav-username">Account</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                            <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+                            <li><a class="dropdown-item" href="bookings.html">My Bookings</a></li>
+                            <li><a class="dropdown-item" href="membership.html">My Membership</a></li>
+                            <li><a class="dropdown-item" href="orders.html">Order History</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Dashboard Sidebar and Content -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="dashboard.html">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.html">
+                                <i class="bi bi-person me-2"></i>
+                                My Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="bookings.html">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                My Bookings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="membership.html">
+                                <i class="bi bi-card-checklist me-2"></i>
+                                My Membership
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="orders.html">
+                                <i class="bi bi-bag me-2"></i>
+                                Order History
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="book-classes.html">
+                                <i class="bi bi-calendar-plus me-2"></i>
+                                Book Classes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="book-sessions.html">
+                                <i class="bi bi-camera-video me-2"></i>
+                                Book Sessions
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Quick Links</span>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="classes.html">
+                                <i class="bi bi-list-task me-2"></i>
+                                Browse Classes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="sessions.html">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Browse Sessions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="shop.html">
+                                <i class="bi bi-shop me-2"></i>
+                                Shop Products
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">My Bookings</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                        </div>
+                        <a href="book-classes.html" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> New Booking
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Alert Container -->
+                <div id="alert-container"></div>
+                
+                <!-- Booking Filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form id="filter-form" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="status-filter" class="form-label">Status</label>
+                                <select class="form-select" id="status-filter">
+                                    <option value="">All Statuses</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="type-filter" class="form-label">Type</label>
+                                <select class="form-select" id="type-filter">
+                                    <option value="">All Types</option>
+                                    <option value="Class">Classes</option>
+                                    <option value="OnlineSession">Online Sessions</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="date-range" class="form-label">Date Range</label>
+                                <select class="form-select" id="date-range">
+                                    <option value="">All Dates</option>
+                                    <option value="upcoming">Upcoming Only</option>
+                                    <option value="past">Past Only</option>
+                                    <option value="this-week">This Week</option>
+                                    <option value="this-month">This Month</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="reset-filters">Reset</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Bookings List -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Class/Session</th>
+                                        <th>Date & Time</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Bookings pagination" class="mt-4">
+                            <ul class="pagination justify-content-center" id="pagination">
+                                <!-- Pagination will be added dynamically -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Cancel Booking Confirmation Modal -->
+    <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelBookingModalLabel">Cancel Booking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this booking?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Cancellations made less than 24 hours before the class/session time may not be eligible for a refund of membership hours.
+                    </div>
+                    <div id="cancel-booking-details"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep Booking</button>
+                    <button type="button" class="btn btn-danger" id="confirm-cancel-btn">Yes, Cancel Booking</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-title">Elite Gym</h5>
+                    <p class="footer-text">Empowering women through fitness and wellness.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="sessions.html">Online Sessions</a></li>
+                        <li><a href="trainers.html">Trainers</a></li>
+                        <li><a href="pricing.html">Membership Plans</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Contact Us</h5>
+                    <div class="contact-info">
+                        <p><i class="bi bi-geo-alt"></i> 123 Fitness Street, Health City, HC 12345</p>
+                        <p><i class="bi bi-telephone"></i> (123) 456-7890</p>
+                        <p><i class="bi bi-envelope"></i> info@elitegym.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Elite Gym. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Check if user is logged in
+            if (!authService.isLoggedIn()) {
+                window.location.href = 'login.html?redirect=bookings.html';
+                return;
+            }
+            
+            // Get current user
+            const user = authService.getCurrentUser();
+            document.getElementById('nav-username').textContent = user.name;
+            
+            // DOM elements
+            const bookingsTable = document.getElementById('bookings-table');
+            const pagination = document.getElementById('pagination');
+            const statusFilter = document.getElementById('status-filter');
+            const typeFilter = document.getElementById('type-filter');
+            const dateRangeFilter = document.getElementById('date-range');
+            const resetFiltersBtn = document.getElementById('reset-filters');
+            const cancelBookingModal = new bootstrap.Modal(document.getElementById('cancelBookingModal'));
+            const cancelBookingDetails = document.getElementById('cancel-booking-details');
+            const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            // Global variables
+            let allBookings = [];
+            let filteredBookings = [];
+            const itemsPerPage = 10;
+            let currentPage = 1;
+            let bookingToCancel = null;
+            
+            // Load bookings
+            async function loadBookings() {
+                try {
+                    uiHelper.showLoading(bookingsTable);
+                    
+                    allBookings = await apiService.getUserBookings(user.id);
+                    filteredBookings = [...allBookings];
+                    
+                    renderBookings();
+                    renderPagination();
+                } catch (error) {
+                    console.error('Error loading bookings:', error);
+                    bookingsTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="alert alert-danger">Error loading bookings. Please try again later.</div>
+                            </td>
+                        </tr>
+                    `;
+                } finally {
+                    uiHelper.hideLoading(bookingsTable.querySelector('.spinner-border'));
+                }
+            }
+            
+            // Filter bookings
+            function filterBookings() {
+                const statusValue = statusFilter.value;
+                const typeValue = typeFilter.value;
+                const dateRangeValue = dateRangeFilter.value;
+                const now = new Date();
+                
+                filteredBookings = allBookings.filter(booking => {
+                    // Status filter
+                    if (statusValue && booking.status !== statusValue) {
+                        return false;
+                    }
+                    
+                    // Type filter
+                    if (typeValue && booking.type !== typeValue) {
+                        return false;
+                    }
+                    
+                    // Date range filter
+                    if (dateRangeValue) {
+                        const bookingDate = new Date(booking.startTime);
+                        
+                        switch (dateRangeValue) {
+                            case 'upcoming':
+                                if (bookingDate <= now) return false;
+                                break;
+                            case 'past':
+                                if (bookingDate > now) return false;
+                                break;
+                            case 'this-week':
+                                const weekStart = new Date(now);
+                                weekStart.setDate(now.getDate() - now.getDay());
+                                weekStart.setHours(0, 0, 0, 0);
+                                
+                                const weekEnd = new Date(weekStart);
+                                weekEnd.setDate(weekStart.getDate() + 7);
+                                
+                                if (bookingDate < weekStart || bookingDate > weekEnd) return false;
+                                break;
+                            case 'this-month':
+                                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                                
+                                if (bookingDate < monthStart || bookingDate > monthEnd) return false;
+                                break;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                // Reset to first page and render
+                currentPage = 1;
+                renderBookings();
+                renderPagination();
+            }
+            
+            // Render bookings
+            function renderBookings() {
+                // Calculate pagination
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedBookings = filteredBookings.slice(startIndex, endIndex);
+                
+                // Clear table
+                bookingsTable.innerHTML = '';
+                
+                if (paginatedBookings.length === 0) {
+                    bookingsTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="alert alert-info">No bookings match your selected filters.</div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Render each booking
+                paginatedBookings.forEach(booking => {
+                    const bookingDate = new Date(booking.startTime);
+                    const dateStr = bookingDate.toLocaleDateString();
+                    const timeStr = bookingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    const row = document.createElement('tr');
+                    
+                    // Set row class based on status
+                    if (booking.status === 'Cancelled') {
+                        row.classList.add('table-danger');
+                    } else if (booking.status === 'Completed') {
+                        row.classList.add('table-success');
+                    }
+                    
+                    row.innerHTML = `
+                        <td>#${booking.id}</td>
+                        <td>
+                            <div>${booking.className}</div>
+                            <small class="text-muted">${booking.trainerName}</small>
+                        </td>
+                        <td>
+                            <div>${dateStr}</div>
+                            <small class="text-muted">${timeStr}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-${booking.type === 'Class' ? 'primary' : 'info'}">${booking.type === 'Class' ? 'Class' : 'Online Session'}</span>
+                        </td>
+                        <td>
+                            <span class="booking-status status-${booking.status.toLowerCase()}">${booking.status}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary view-booking-btn" data-booking-id="${booking.id}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                ${booking.status === 'Confirmed' ? `
+                                <button class="btn btn-outline-danger cancel-booking-btn" data-booking-id="${booking.id}">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    `;
+                    
+                    bookingsTable.appendChild(row);
+                });
+                
+                // Add event listeners to buttons
+                document.querySelectorAll('.view-booking-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const bookingId = this.getAttribute('data-booking-id');
+                        const booking = allBookings.find(b => b.id == bookingId);
+                        if (booking) {
+                            showBookingDetails(booking);
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.cancel-booking-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const bookingId = this.getAttribute('data-booking-id');
+                        const booking = allBookings.find(b => b.id == bookingId);
+                        if (booking) {
+                            showCancelConfirmation(booking);
+                        }
+                    });
+                });
+            }
+            
+            // Render pagination
+            function renderPagination() {
+                const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+                
+                // Clear pagination
+                pagination.innerHTML = '';
+                
+                if (totalPages <= 1) return;
+                
+                // Previous button
+                const prevDisabled = currentPage === 1 ? 'disabled' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${prevDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    const active = i === currentPage ? 'active' : '';
+                    pagination.innerHTML += `
+                        <li class="page-item ${active}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                }
+                
+                // Next button
+                const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+                pagination.innerHTML += `
+                    <li class="page-item ${nextDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `;
+                
+                // Add event listeners
+                pagination.querySelectorAll('.page-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const page = parseInt(this.getAttribute('data-page'));
+                        if (page > 0 && page <= totalPages) {
+                            currentPage = page;
+                            renderBookings();
+                            renderPagination();
+                            
+                            // Scroll to top of table
+                            document.querySelector('.table-responsive').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                });
+            }
+            
+            // Show booking details
+            function showBookingDetails(booking) {
+                const bookingDate = new Date(booking.startTime);
+                const dateStr = bookingDate.toLocaleDateString();
+                const timeStr = bookingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const endTime = new Date(booking.endTime);
+                const endTimeStr = endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const detailsHtml = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${booking.className}</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Trainer:</strong> ${booking.trainerName}</p>
+                                    <p><strong>Date:</strong> ${dateStr}</p>
+                                    <p><strong>Time:</strong> ${timeStr} - ${endTimeStr}</p>
+                                    <p><strong>Location:</strong> ${booking.location}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Status:</strong> <span class="badge bg-${booking.status === 'Confirmed' ? 'success' : booking.status === 'Cancelled' ? 'danger' : 'info'}">${booking.status}</span></p>
+                                    <p><strong>Booking Date:</strong> ${new Date(booking.bookingDate).toLocaleDateString()}</p>
+                                    <p><strong>Hours Consumed:</strong> ${booking.hoursConsumed}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create and show modal
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Booking Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${detailsHtml}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                const bookingModal = new bootstrap.Modal(modal);
+                bookingModal.show();
+                
+                // Remove modal from DOM when hidden
+                modal.addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modal);
+                });
+            }
+            
+            // Show cancel confirmation
+            function showCancelConfirmation(booking) {
+                bookingToCancel = booking;
+                
+                const bookingDate = new Date(booking.startTime);
+                const dateStr = bookingDate.toLocaleDateString();
+                const timeStr = bookingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Check if booking is within 24 hours
+                const now = new Date();
+                const hoursDiff = (bookingDate - now) / (1000 * 60 * 60);
+                const isWithin24Hours = hoursDiff < 24;
+                
+                cancelBookingDetails.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>${booking.className}</h6>
+                            <p class="mb-1"><strong>Date & Time:</strong> ${dateStr} at ${timeStr}</p>
+                            <p class="mb-1"><strong>Trainer:</strong> ${booking.trainerName}</p>
+                            <p class="mb-0"><strong>Location:</strong> ${booking.location}</p>
+                        </div>
+                    </div>
+                    ${isWithin24Hours ? `
+                    <div class="alert alert-warning mt-2">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        This booking is within 24 hours. If you cancel, you may not be refunded your membership hours.
+                    </div>
+                    ` : ''}
+                `;
+                
+                cancelBookingModal.show();
+            }
+            
+            // Cancel booking
+            async function cancelBooking() {
+                if (!bookingToCancel) return;
+                
+                try {
+                    await apiService.cancelBooking(bookingToCancel.id, user.id);
+                    
+                    // Show success message
+                    uiHelper.showAlert('Booking cancelled successfully', 'success');
+                    
+                    // Hide modal
+                    cancelBookingModal.hide();
+                    
+                    // Reload bookings
+                    await loadBookings();
+                    
+                } catch (error) {
+                    console.error('Error cancelling booking:', error);
+                    uiHelper.showAlert(error.message || 'Failed to cancel booking. Please try again.', 'danger');
+                }
+            }
+            
+            // Add event listeners
+            statusFilter.addEventListener('change', filterBookings);
+            typeFilter.addEventListener('change', filterBookings);
+            dateRangeFilter.addEventListener('change', filterBookings);
+            resetFiltersBtn.addEventListener('click', function() {
+                statusFilter.value = '';
+                typeFilter.value = '';
+                dateRangeFilter.value = '';
+                filterBookings();
+            });
+            confirmCancelBtn.addEventListener('click', cancelBooking);
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                authService.logout();
+            });
+            
+            // Initial load
+            loadBookings();
+        });
+    </script>
+</body>
+</html>

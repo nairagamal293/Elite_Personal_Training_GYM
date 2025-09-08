@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Gym - Women's Fitness Center</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #800020;      /* Burgundy */
+            --secondary-color: #a52a2a;     /* Lighter Burgundy */
+            --accent-color: #e6b8af;        /* Light Burgundy Accent */
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background-color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover:after, .navbar-nav .nav-link.active:after {
+            width: 70%;
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        /* 3D Background Elements */
+        .hero-3d-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .cube {
+            position: absolute;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+        }
+        
+        .cube1 {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+        
+        .cube2 {
+            width: 80px;
+            height: 80px;
+            top: 60%;
+            left: 70%;
+            animation-duration: 30s;
+            animation-direction: reverse;
+        }
+        
+        .cube3 {
+            width: 120px;
+            height: 120px;
+            top: 40%;
+            left: 40%;
+            animation-duration: 35s;
+        }
+        
+        .cube > div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(128, 0, 32, 0.1);
+            border: 1px solid rgba(128, 0, 32, 0.2);
+        }
+        
+        .cube .front  { transform: rotateY(  0deg) translateZ(50px); }
+        .cube .back   { transform: rotateY(180deg) translateZ(50px); }
+        .cube .right  { transform: rotateY( 90deg) translateZ(50px); }
+        .cube .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .cube .top    { transform: rotateX( 90deg) translateZ(50px); }
+        .cube .bottom { transform: rotateX(-90deg) translateZ(50px); }
+        
+        .cube2 .front  { transform: rotateY(  0deg) translateZ(40px); }
+        .cube2 .back   { transform: rotateY(180deg) translateZ(40px); }
+        .cube2 .right  { transform: rotateY( 90deg) translateZ(40px); }
+        .cube2 .left   { transform: rotateY(-90deg) translateZ(40px); }
+        .cube2 .top    { transform: rotateX( 90deg) translateZ(40px); }
+        .cube2 .bottom { transform: rotateX(-90deg) translateZ(40px); }
+        
+        .cube3 .front  { transform: rotateY(  0deg) translateZ(60px); }
+        .cube3 .back   { transform: rotateY(180deg) translateZ(60px); }
+        .cube3 .right  { transform: rotateY( 90deg) translateZ(60px); }
+        .cube3 .left   { transform: rotateY(-90deg) translateZ(60px); }
+        .cube3 .top    { transform: rotateX( 90deg) translateZ(60px); }
+        .cube3 .bottom { transform: rotateX(-90deg) translateZ(60px); }
+        
+        @keyframes rotate {
+            from { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            to { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-tagline {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+        }
+        
+        .btn-hero {
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: var(--secondary-color);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-custom {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-outline-custom:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        
+        .hero-image {
+            position: relative;
+            width: 75%;
+            height: 400px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            transform: rotateY(-15deg);
+            transition: transform 0.5s ease;
+        }
+        
+     
+        
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background-color: #fff;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: -10px;
+            left: 0;
+        }
+        
+        .section-subtitle {
+            color: var(--text-light);
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            height: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon {
+            background-color: var(--primary-color);
+        }
+        
+        .feature-icon i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .feature-icon i {
+            color: #fff;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+        
+        .feature-text {
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+        
+        /* Popular Classes Section */
+        .classes-section {
+            padding: 80px 0;
+            background-color: #f8f0f3;
+        }
+        
+        .class-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+        }
+        
+        .class-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+        }
+        
+        .class-img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .class-content {
+            padding: 20px;
+        }
+        
+        .class-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        
+        .class-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .class-info i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        .btn-class {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-class:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        /* Membership Plans Section */
+        .membership-section {
+            padding: 80px 0;
+            background-color: #fff;
+        }
+        
+        .pricing-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+            text-align: center;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+        }
+        
+        .pricing-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+        }
+        
+        .pricing-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .pricing-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 400;
+        }
+        
+        .pricing-body {
+            padding: 30px 20px;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+        
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: var(--text-light);
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features li i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .btn-pricing {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pricing:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 80px 0;
+            background-color: #f8f0f3;
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            position: relative;
+        }
+        
+        .testimonial-card:before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 5rem;
+            color: var(--accent-color);
+            font-family: Georgia, serif;
+            line-height: 1;
+            opacity: 0.5;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .author-avatar i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .author-info h6 {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .author-info small {
+            color: var(--text-light);
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .btn-cta {
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cta:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 70px 0 20px;
+        }
+        
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .footer-text {
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+        
+        .contact-info i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ccc;
+        }
+        
+        /* Loading Spinner */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .spinner-border {
+            color: var(--primary-color) !important;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 8px;
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .hero-image {
+                position: relative;
+                width: 100%;
+                height: 300px;
+                margin-top: 30px;
+                transform: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 80px 0 50px;
+            }
+            
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .features-section, .classes-section, .membership-section, .testimonials-section, .cta-section {
+                padding: 60px 0;
+            }
+            
+            .cta-title {
+                font-size: 2rem;
+            }
+            
+            /* Hide 3D elements on smaller screens */
+            .hero-3d-background {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .btn-hero {
+                display: block;
+                width: 100%;
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-lightning-charge-fill"></i> Elite Gym
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="classes.html">Classes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="sessions.html">Online Sessions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="trainers.html">Trainers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pricing.html">Membership</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="shop.html">Shop</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.html">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> Account
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="login.html">Login</a></li>
+                            <li><a class="dropdown-item" href="register.html">Register</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <!-- 3D Background Elements -->
+        <div class="hero-3d-background">
+            <div class="cube cube1">
+                <div class="front"></div>
+                <div class="back"></div>
+                <div class="right"></div>
+                <div class="left"></div>
+                <div class="top"></div>
+                <div class="bottom"></div>
+            </div>
+            <div class="cube cube2">
+                <div class="front"></div>
+                <div class="back"></div>
+                <div class="right"></div>
+                <div class="left"></div>
+                <div class="top"></div>
+                <div class="bottom"></div>
+            </div>
+            <div class="cube cube3">
+                <div class="front"></div>
+                <div class="back"></div>
+                <div class="right"></div>
+                <div class="left"></div>
+                <div class="top"></div>
+                <div class="bottom"></div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <div class="hero-tagline">Women's Fitness Center</div>
+                        <h1 class="hero-title">Don't Complain, Enjoy The Pain</h1>
+                        <p class="hero-subtitle">Transform your body and mind with our premium fitness programs designed exclusively for women.</p>
+                        <div class="hero-buttons">
+                            <a href="register.html" class="btn btn-hero btn-primary-custom">Join Now</a>
+                            <a href="classes.html" class="btn btn-hero btn-outline-custom">View Classes</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <img src="images/hero2.png" alt="Woman lifting weights" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Why Choose Us</h2>
+                <p class="section-subtitle">We offer more than just a gym - we provide a community of support and empowerment</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h5 class="feature-title">Women-Only Environment</h5>
+                        <p class="feature-text">A safe, comfortable space designed exclusively for women to work out without intimidation.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                        <h5 class="feature-title">Qualified Instructors</h5>
+                        <p class="feature-text">Certified female trainers who understand women's fitness needs and provide personalized guidance.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h5 class="feature-title">Flexible Scheduling</h5>
+                        <p class="feature-text">Book classes and sessions online with our easy-to-use system, available 24/7.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <h5 class="feature-title">Free Consultations</h5>
+                        <p class="feature-text">Get personalized fitness assessments and advice from our expert trainers at no extra cost.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Popular Classes Section -->
+    <section class="classes-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Workout Programs</h2>
+                <p class="section-subtitle">Join our most popular fitness programs led by expert trainers</p>
+            </div>
+            
+            <div class="row g-4" id="popular-classes">
+                <!-- Classes will be loaded here -->
+                <div class="col-md-4">
+                    <div class="spinner-container">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="classes.html" class="btn btn-primary-custom">View All Programs</a>
+            </div>
+        </div>
+    </section>
+    <!-- Membership Plans Section -->
+    <section class="membership-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Membership Plans</h2>
+                <p class="section-subtitle">Choose the plan that works best for your fitness goals and lifestyle</p>
+            </div>
+            
+            <div class="row g-4" id="membership-plans">
+                <!-- Membership plans will be loaded here -->
+                <div class="col-md-4">
+                    <div class="spinner-container">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Member Testimonials</h2>
+                <p class="section-subtitle">Hear from women who have transformed their lives with Elite Gym</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Elite Gym has completely transformed my fitness journey. The supportive environment and excellent trainers have helped me achieve goals I never thought possible."</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="author-info">
+                                <h6>Sarah Johnson</h6>
+                                <small>Member for 2 years</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"As a busy professional, I love the flexibility of booking classes online. The variety of sessions means I never get bored with my workout routine."</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="author-info">
+                                <h6>Emily Rodriguez</h6>
+                                <small>Member for 1 year</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"The women-only environment makes me feel comfortable and confident. I've made great friends while getting in the best shape of my life!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="author-info">
+                                <h6>Jessica Williams</h6>
+                                <small>Member for 6 months</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to Start Your Fitness Journey?</h2>
+            <p class="cta-subtitle">Join Elite Gym today and take the first step towards a healthier, stronger you.</p>
+            <a href="register.html" class="btn btn-cta">Join Now</a>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-title">Elite Gym</h5>
+                    <p class="footer-text">Empowering women through fitness and wellness.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="sessions.html">Online Sessions</a></li>
+                        <li><a href="trainers.html">Trainers</a></li>
+                        <li><a href="pricing.html">Membership Plans</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Contact Us</h5>
+                    <div class="contact-info">
+                        <p><i class="bi bi-geo-alt"></i> 123 Fitness Street, Health City, HC 12345</p>
+                        <p><i class="bi bi-telephone"></i> (123) 456-7890</p>
+                        <p><i class="bi bi-envelope"></i> info@elitegym.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Elite Gym. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load popular classes
+            try {
+                const classesContainer = document.getElementById('popular-classes');
+                classesContainer.innerHTML = '';
+                
+                const classes = await apiService.getClasses();
+                
+                // Display only first 3 classes
+                classes.slice(0, 3).forEach(classItem => {
+                    const classCard = `
+                        <div class="col-md-4">
+                            <div class="card class-card">
+                                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="card-img-top class-img" alt="${classItem.name}">
+                                <div class="card-body class-content">
+                                    <h5 class="card-title class-title">${classItem.name}</h5>
+                                    <p class="card-text">${classItem.description}</p>
+                                    <div class="class-info">
+                                        <span><i class="bi bi-clock"></i> ${classItem.duration}h</span>
+                                        <span><i class="bi bi-person"></i> ${classItem.trainerName}</span>
+                                    </div>
+                                    <a href="class-details.html?id=${classItem.id}" class="btn btn-class">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    classesContainer.innerHTML += classCard;
+                });
+            } catch (error) {
+                console.error('Error loading classes:', error);
+                const classesContainer = document.getElementById('popular-classes');
+                classesContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-warning">Unable to load classes at this time. Please try again later.</div>
+                    </div>
+                `;
+            }
+            
+            // Load membership plans
+            try {
+                const plansContainer = document.getElementById('membership-plans');
+                plansContainer.innerHTML = '';
+                
+                const membershipTypes = await apiService.getMembershipTypes();
+                
+                membershipTypes.forEach(plan => {
+                    const planCard = `
+                        <div class="col-md-4">
+                            <div class="card pricing-card">
+                                <div class="pricing-header">
+                                    <h5 class="pricing-title">${plan.name}</h5>
+                                    <div class="pricing-price">$${plan.price}<span>/${plan.durationMonths} month${plan.durationMonths > 1 ? 's' : ''}</span></div>
+                                </div>
+                                <div class="pricing-body">
+                                    <p>${plan.description}</p>
+                                    <ul class="pricing-features">
+                                        <li><i class="bi bi-check-circle-fill"></i> ${plan.totalHours} hours total</li>
+                                        <li><i class="bi bi-check-circle-fill"></i> Access to all classes</li>
+                                        <li><i class="bi bi-check-circle-fill"></i> Online booking system</li>
+                                        <li><i class="bi bi-check-circle-fill"></i> Personal trainer support</li>
+                                    </ul>
+                                    <a href="pricing.html" class="btn btn-pricing">Choose Plan</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    plansContainer.innerHTML += planCard;
+                });
+            } catch (error) {
+                console.error('Error loading membership plans:', error);
+                const plansContainer = document.getElementById('membership-plans');
+                plansContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-warning">Unable to load membership plans at this time. Please try again later.</div>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

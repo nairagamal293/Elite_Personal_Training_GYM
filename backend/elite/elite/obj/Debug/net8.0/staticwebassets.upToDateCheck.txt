@@ -1,0 +1,8 @@
+wwwroot\images\products\81fc680e-48ba-4248-be56-2ae83866754b.jpeg
+wwwroot\images\trainers\ce2539db-097d-49e5-83ba-ee51eca88047.jpeg
+wwwroot\images\trainers\125cb339-244b-4e2c-a636-68f650821f17.jpg
+wwwroot\images\trainers\8fc79621-34ac-4ebd-b8ab-3867df63ff11.jpeg
+wwwroot\images\products\58152cb7-cc6b-4911-af0e-99d351a62784.jpg
+wwwroot\images\products\5b41ff1b-de41-4078-af26-3b7fd88cf509.jpeg
+wwwroot\images\products\a232b551-3593-43ca-b608-16569b5a349c.jpeg
+wwwroot\images\products\c1cfb80e-0dea-4d60-b0a5-99a021a90535.jpeg
