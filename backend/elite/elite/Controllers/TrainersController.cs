@@ -74,7 +74,7 @@ namespace elite.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateTrainer(int id, [FromForm] TrainerCreateDto trainerUpdateDto)
+        public async Task<IActionResult> UpdateTrainer(int id, [FromForm] TrainerUpdateDto trainerUpdateDto) // Changed parameter type
         {
             try
             {
@@ -92,7 +92,7 @@ namespace elite.Controllers
             }
         }
 
-        
+
 
 
         [HttpDelete("{id}")]

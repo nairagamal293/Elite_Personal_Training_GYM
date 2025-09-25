@@ -28,7 +28,7 @@ const apiService = {
     baseUrl: 'https://localhost:7182/api',
     
     // Generic request function
-    // Update the request function to handle FormData properly
+   // In apiService object
 async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     
@@ -57,12 +57,41 @@ async request(endpoint, options = {}) {
     };
     
     try {
+        console.log(`Making ${finalOptions.method || 'GET'} request to:`, url);
+        if (finalOptions.body) {
+            console.log('Request body:', finalOptions.body);
+        }
+        
         const response = await fetch(url, finalOptions);
+        
+        // Log response status
+        console.log('Response status:', response.status);
         
         // Handle non-JSON responses (like 404, 500 errors)
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            let errorData;
+            let responseText;
+            
+            try {
+                // Try to parse as JSON first
+                responseText = await response.text();
+                errorData = JSON.parse(responseText);
+                console.error('Error response data:', errorData);
+            } catch (e) {
+                // If we can't parse the error response as JSON, create a generic error
+                console.error('Could not parse error response as JSON:', e);
+                errorData = {
+                    message: `HTTP error! status: ${response.status}`,
+                    status: response.status
+                };
+            }
+            
+            // Create a more detailed error object
+            const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            error.status = response.status;
+            error.errors = errorData.errors; // Pass through validation errors
+            
+            throw error;
         }
         
         return await response.json();
@@ -104,28 +133,47 @@ async request(endpoint, options = {}) {
         });
     },
     
-    // Membership Types methods
-    async getMembershipTypes() {
-        return this.request('/membershiptypes');
-    },
+ // Update the getMembershipTypes method in apiService to include inactive types
+async getMembershipTypes(includeInactive = true) {
+    return this.request(`/membershiptypes?includeInactive=${includeInactive}`);
+},
+
     
    async getMembershipTypeById(id) {
     return this.request(`/membershiptypes/${id}`);
 },
     
-    async createMembershipType(membershipData) {
-        return this.request('/membershiptypes', {
+    // In apiService object
+
+async createMembershipType(membershipData) {
+    try {
+        console.log('Creating membership type with data:', membershipData);
+        const response = await this.request('/membershiptypes', {
             method: 'POST',
             body: JSON.stringify(membershipData)
         });
-    },
-    
-    async updateMembershipType(id, membershipData) {
-        return this.request(`/membershiptypes/${id}`, {
+        console.log('Create membership type response:', response);
+        return response;
+    } catch (error) {
+        console.error('Error in createMembershipType:', error);
+        throw error;
+    }
+},
+
+async updateMembershipType(id, membershipData) {
+    try {
+        console.log('Updating membership type with data:', membershipData);
+        const response = await this.request(`/membershiptypes/${id}`, {
             method: 'PUT',
             body: JSON.stringify(membershipData)
         });
-    },
+        console.log('Update membership type response:', response);
+        return response;
+    } catch (error) {
+        console.error('Error in updateMembershipType:', error);
+        throw error;
+    }
+},
     
     async deleteMembershipType(id) {
         return this.request(`/membershiptypes/${id}`, {
@@ -133,10 +181,10 @@ async request(endpoint, options = {}) {
         });
     },
     
-    async toggleMembershipTypeStatus(id, isActive) {
+   async toggleMembershipTypeStatus(id, isActive) {
     return this.request(`/membershiptypes/${id}/toggle`, {
         method: 'PATCH',
-        body: JSON.stringify(isActive)  // Send just the boolean value, not an object
+        body: JSON.stringify(isActive)  // Send just the boolean value
     });
 },
     
@@ -186,6 +234,22 @@ async request(endpoint, options = {}) {
         });
     },
     
+
+    // Class Schedule methods
+async createClassSchedule(scheduleData) {
+    return this.request('/classes/schedules', {
+        method: 'POST',
+        body: JSON.stringify(scheduleData)
+    });
+},
+
+// Session Schedule methods
+async createSessionSchedule(scheduleData) {
+    return this.request('/onlinesessions/schedules', {
+        method: 'POST',
+        body: JSON.stringify(scheduleData)
+    });
+},
     // Sessions methods
     async getSessions() {
         return this.request('/onlinesessions');

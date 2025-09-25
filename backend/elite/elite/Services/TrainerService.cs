@@ -1,4 +1,5 @@
-﻿using elite.Data;
+﻿// Services/TrainerService.cs
+using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
 using elite.Models;
@@ -6,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace elite.Services
 {
-    // Services/TrainerService.cs
     public class TrainerService : ITrainerService
     {
         private readonly GymDbContext _context;
@@ -53,7 +53,6 @@ namespace elite.Services
             };
         }
 
-        // Services/TrainerService.cs
         public async Task<TrainerDto> CreateTrainerAsync(TrainerCreateDto trainerCreateDto)
         {
             try
@@ -104,15 +103,16 @@ namespace elite.Services
             }
         }
 
-        public async Task<TrainerDto> UpdateTrainerAsync(int id, TrainerCreateDto trainerUpdateDto)
+        // Updated method with TrainerUpdateDto
+        public async Task<TrainerDto> UpdateTrainerAsync(int id, TrainerUpdateDto trainerUpdateDto)
         {
             try
             {
                 var trainer = await _context.Trainers.FindAsync(id);
                 if (trainer == null) throw new ArgumentException("Trainer not found");
 
-                // Handle image update if provided
-                if (trainerUpdateDto.ImageFile != null)
+                // Handle image update ONLY if a new image is provided
+                if (trainerUpdateDto.ImageFile != null && trainerUpdateDto.ImageFile.Length > 0)
                 {
                     try
                     {
@@ -131,14 +131,15 @@ namespace elite.Services
                         // Keep existing image if upload fails
                     }
                 }
+                // If no new image is provided, keep the existing image URL
 
+                // Update other properties
                 trainer.Name = trainerUpdateDto.Name;
                 trainer.Specialization = trainerUpdateDto.Specialization;
                 trainer.ExperienceYears = trainerUpdateDto.ExperienceYears;
                 trainer.Certifications = trainerUpdateDto.Certifications;
                 trainer.Bio = trainerUpdateDto.Bio;
 
-                _context.Trainers.Update(trainer);
                 await _context.SaveChangesAsync();
 
                 return new TrainerDto

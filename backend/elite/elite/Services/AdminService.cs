@@ -115,7 +115,7 @@ namespace elite.Services
         public async Task<IEnumerable<BookingResponseDto>> GetAllBookingsAsync(DateTime? startDate, DateTime? endDate)
         {
             var query = _context.Bookings
-                .Include(b => b.User)
+                .Include(b => b.User) // Ensure User is included
                 .AsQueryable();
 
             if (startDate.HasValue)
@@ -134,6 +134,8 @@ namespace elite.Services
                     BookingDate = b.BookingDate,
                     Status = b.Status,
                     HoursConsumed = b.HoursConsumed,
+                    UserId = b.UserId,
+                    UserName = b.User.Name, // Ensure this is set
                     ClassName = b.Type == "Class"
                         ? _context.ClassSchedules
                             .Where(cs => cs.Id == b.ScheduleId)
@@ -210,8 +212,6 @@ namespace elite.Services
                 .ToListAsync();
         }
 
-        // Services/AdminService.cs
-        // Services/AdminService.cs
         public async Task<BookingResponseDto> GetBookingDetailsAsync(int bookingId)
         {
             var booking = await _context.Bookings
@@ -226,7 +226,8 @@ namespace elite.Services
                     Status = b.Status,
                     HoursConsumed = b.HoursConsumed,
                     UserId = b.UserId,
-                    UserName = b.User.Name,
+                    UserName = b.User.Name, // Ensure this is set
+                    UserEmail = b.User.Email, // Add this
                     ClassName = b.Type == "Class"
                         ? _context.ClassSchedules
                             .Where(cs => cs.Id == b.ScheduleId)

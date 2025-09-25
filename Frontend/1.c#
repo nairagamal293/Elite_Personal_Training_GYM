@@ -511,8 +511,8 @@ namespace elite.Controllers
     }
 
 }
-
-using elite.Data;
+ 
+ using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
 using elite.Models;
@@ -1156,6 +1156,26 @@ namespace elite.Controllers
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductCreateDto productUpdateDto)
+        {
+            try
+            {
+                var result = await _productService.UpdateProductAsync(id, productUpdateDto);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating product");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
@@ -1446,7 +1466,7 @@ namespace elite.Controllers
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateTrainer(int id, [FromForm] TrainerCreateDto trainerUpdateDto)
+        public async Task<IActionResult> UpdateTrainer(int id, [FromForm] TrainerUpdateDto trainerUpdateDto) // Changed parameter type
         {
             try
             {
@@ -1464,7 +1484,7 @@ namespace elite.Controllers
             }
         }
 
-        
+
 
 
         [HttpDelete("{id}")]
@@ -2196,6 +2216,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace elite.DTOs
 {
+    public class TrainerUpdateDto
+    {
+        [Required, MaxLength(100)]
+        public string Name { get; set; }
+
+        [Required, MaxLength(100)]
+        public string Specialization { get; set; }
+
+        [Required, Range(0, 50)]
+        public int ExperienceYears { get; set; }
+
+        public string Certifications { get; set; }
+
+        [Required]
+        public string Bio { get; set; }
+
+        public IFormFile? ImageFile { get; set; } // Optional for updates
+    }
+}
+using System.ComponentModel.DataAnnotations;
+
+namespace elite.DTOs
+{
     public class UserRegisterDto
     {
         [Required, MaxLength(100)]
@@ -2415,7 +2458,7 @@ namespace elite.Interfaces
         Task<IEnumerable<TrainerDto>> GetAllTrainersAsync();
         Task<TrainerDto> GetTrainerByIdAsync(int id);
         Task<TrainerDto> CreateTrainerAsync(TrainerCreateDto trainerCreateDto);
-        Task<TrainerDto> UpdateTrainerAsync(int id, TrainerCreateDto trainerUpdateDto);
+        Task<TrainerDto> UpdateTrainerAsync(int id, TrainerUpdateDto trainerUpdateDto); // Changed parameter type
         Task<bool> DeleteTrainerAsync(int id);
         Task<IEnumerable<ClassDto>> GetTrainerClassesAsync(int trainerId);
         Task<IEnumerable<OnlineSessionDto>> GetTrainerSessionsAsync(int trainerId);
@@ -3727,8 +3770,7 @@ namespace elite.Services
             return bookings;
         }
     }
-}
-using elite.Data;
+}using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
 using elite.Models;
@@ -5119,6 +5161,7 @@ namespace elite.Services
         }
     }
 }
+// Services/TrainerService.cs
 using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
@@ -5127,7 +5170,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace elite.Services
 {
-    // Services/TrainerService.cs
     public class TrainerService : ITrainerService
     {
         private readonly GymDbContext _context;
@@ -5174,7 +5216,6 @@ namespace elite.Services
             };
         }
 
-        // Services/TrainerService.cs
         public async Task<TrainerDto> CreateTrainerAsync(TrainerCreateDto trainerCreateDto)
         {
             try
@@ -5225,15 +5266,16 @@ namespace elite.Services
             }
         }
 
-        public async Task<TrainerDto> UpdateTrainerAsync(int id, TrainerCreateDto trainerUpdateDto)
+        // Updated method with TrainerUpdateDto
+        public async Task<TrainerDto> UpdateTrainerAsync(int id, TrainerUpdateDto trainerUpdateDto)
         {
             try
             {
                 var trainer = await _context.Trainers.FindAsync(id);
                 if (trainer == null) throw new ArgumentException("Trainer not found");
 
-                // Handle image update if provided
-                if (trainerUpdateDto.ImageFile != null)
+                // Handle image update ONLY if a new image is provided
+                if (trainerUpdateDto.ImageFile != null && trainerUpdateDto.ImageFile.Length > 0)
                 {
                     try
                     {
@@ -5252,14 +5294,15 @@ namespace elite.Services
                         // Keep existing image if upload fails
                     }
                 }
+                // If no new image is provided, keep the existing image URL
 
+                // Update other properties
                 trainer.Name = trainerUpdateDto.Name;
                 trainer.Specialization = trainerUpdateDto.Specialization;
                 trainer.ExperienceYears = trainerUpdateDto.ExperienceYears;
                 trainer.Certifications = trainerUpdateDto.Certifications;
                 trainer.Bio = trainerUpdateDto.Bio;
 
-                _context.Trainers.Update(trainer);
                 await _context.SaveChangesAsync();
 
                 return new TrainerDto
@@ -5643,7 +5686,8 @@ app.Run();
     }
   },
   "AllowedHosts": "*"
-} 
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5662,8 +5706,148 @@ app.Run();
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <!-- Custom CSS -->
-     <link rel="stylesheet" href="admin.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+        }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fc;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .page-header {
+            border-bottom: 1px solid #e3e6f0;
+            margin: -1.5rem 0 1.5rem 0;
+            padding-bottom: 1.5rem;
+        }
+
+        .stats-card {
+            border-left: 0.25rem solid !important;
+            transition: transform 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .border-left-primary {
+            border-left-color: var(--primary-color) !important;
+        }
+
+        .border-left-success {
+            border-left-color: var(--success-color) !important;
+        }
+
+        .border-left-info {
+            border-left-color: var(--info-color) !important;
+        }
+
+        .border-left-warning {
+            border-left-color: var(--warning-color) !important;
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid #e3e6f0;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--secondary-color);
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: transparent;
+            border-color: #e3e6f0 #e3e6f0 #fff;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 600;
+        }
+
+        .btn-group .btn {
+            border-radius: 0.35rem;
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .modal-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+
+        .spinner-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .chart-area {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn-group .btn {
+                margin-bottom: 0.25rem;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light">
     <!-- Navigation -->
@@ -5805,7 +5989,7 @@ app.Run();
             </ul>
             <!-- Tab Content -->
             <div class="tab-content" id="adminTabContent">
-                <!-- Dashboard Tab (existing content) -->
+                <!-- Dashboard Tab -->
                 <div class="tab-pane fade show active" id="dashboard-pane" role="tabpanel" aria-labelledby="dashboard-tab">
                     <!-- Charts Row -->
                     <div class="row">
@@ -6297,7 +6481,7 @@ app.Run();
                         </div>
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label for="class-duration" class="form-label">Duration (hours)</label>
+                                <label for="class-duration" class="form-label">Duration (minutes)</label>
                                 <input type="number" class="form-control" id="class-duration" min="15" step="15" required>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -6318,6 +6502,7 @@ app.Run();
             </div>
         </div>
     </div>
+    
     <!-- Create/Edit Online Session Modal -->
     <div class="modal fade" id="sessionModal" tabindex="-1" aria-labelledby="sessionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -6364,6 +6549,7 @@ app.Run();
             </div>
         </div>
     </div>
+    
     <!-- Create/Edit Trainer Modal -->
     <div class="modal fade" id="trainerModal" tabindex="-1" aria-labelledby="trainerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -6399,12 +6585,11 @@ app.Run();
                             <label for="trainer-bio" class="form-label">Bio</label>
                             <textarea class="form-control" id="trainer-bio" rows="3" required></textarea>
                         </div>
-                        <!-- In trainerModal -->
-<div class="mb-3">
-    <label for="trainer-image-file" class="form-label">Image</label>
-    <input type="file" class="form-control" id="trainer-image-file" accept="image/*">
-    <div id="trainer-image-preview" class="mt-2"></div>
-</div>
+                        <div class="mb-3">
+                            <label for="trainer-image-file" class="form-label">Image</label>
+                            <input type="file" class="form-control" id="trainer-image-file" accept="image/*">
+                            <div id="trainer-image-preview" class="mt-2"></div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -6414,6 +6599,7 @@ app.Run();
             </div>
         </div>
     </div>
+    
     <!-- Create/Edit Membership Type Modal -->
     <div class="modal fade" id="membershipModal" tabindex="-1" aria-labelledby="membershipModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -6462,6 +6648,7 @@ app.Run();
             </div>
         </div>
     </div>
+    
     <!-- Create/Edit Product Modal -->
     <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -6503,12 +6690,11 @@ app.Run();
                                 <input type="number" class="form-control" id="product-stock" min="0" required>
                             </div>
                         </div>
-                       <!-- In productModal -->
-<div class="mb-3">
-    <label for="product-image-file" class="form-label">Image</label>
-    <input type="file" class="form-control" id="product-image-file" accept="image/*">
-    <div id="product-image-preview" class="mt-2"></div>
-</div>
+                        <div class="mb-3">
+                            <label for="product-image-file" class="form-label">Image</label>
+                            <input type="file" class="form-control" id="product-image-file" accept="image/*">
+                            <div id="product-image-preview" class="mt-2"></div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -6518,6 +6704,7 @@ app.Run();
             </div>
         </div>
     </div>
+    
     <!-- Create/Edit Promotion Modal -->
     <div class="modal fade" id="promotionModal" tabindex="-1" aria-labelledby="promotionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -6574,6 +6761,73 @@ app.Run();
             </div>
         </div>
     </div>
+    
+    <!-- Create Class Schedule Modal -->
+    <div class="modal fade" id="createClassScheduleModal" tabindex="-1" aria-labelledby="createClassScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createClassScheduleModalLabel">Create Class Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-class-schedule-form">
+                        <input type="hidden" id="schedule-class-id">
+                        <div class="mb-3">
+                            <label for="schedule-start-time" class="form-label">Start Time</label>
+                            <input type="datetime-local" class="form-control" id="schedule-start-time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="schedule-end-time" class="form-label">End Time</label>
+                            <input type="datetime-local" class="form-control" id="schedule-end-time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="schedule-location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="schedule-location" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-class-schedule-btn">Save Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Online Session Schedule Modal -->
+    <div class="modal fade" id="createSessionScheduleModal" tabindex="-1" aria-labelledby="createSessionScheduleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createSessionScheduleModalLabel">Create Session Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-session-schedule-form">
+                        <input type="hidden" id="session-schedule-session-id">
+                        <div class="mb-3">
+                            <label for="session-schedule-start-time" class="form-label">Start Time</label>
+                            <input type="datetime-local" class="form-control" id="session-schedule-start-time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="session-schedule-end-time" class="form-label">End Time</label>
+                            <input type="datetime-local" class="form-control" id="session-schedule-end-time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="session-schedule-slots" class="form-label">Available Slots</label>
+                            <input type="number" class="form-control" id="session-schedule-slots" min="1" max="20" value="20" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="save-session-schedule-btn">Save Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
@@ -6588,6 +6842,20 @@ app.Run();
     <!-- Custom JS -->
     <script src="../assets/js/main.js"></script>
     <script>
+        // Add this at the top of your dashboard.html script section
+// Add this helper function at the top of your script
+function getImageUrl(imagePath) {
+    if (!imagePath) return '';
+    
+    // Check if the imagePath is already a full URL
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+    
+    // Use the API base URL for relative paths
+    return `https://localhost:7182/${imagePath}`;
+}
+
         document.addEventListener('DOMContentLoaded', function() {
             // Check if user is admin
             if (!authService.isAdmin()) {
@@ -6628,6 +6896,19 @@ app.Run();
         });
     }
     
+
+    // Add event listeners for schedule save buttons
+    const saveClassScheduleBtn = document.getElementById('save-class-schedule-btn');
+    if (saveClassScheduleBtn) {
+        saveClassScheduleBtn.addEventListener('click', saveClassSchedule);
+    }
+    
+    const saveSessionScheduleBtn = document.getElementById('save-session-schedule-btn');
+    if (saveSessionScheduleBtn) {
+        saveSessionScheduleBtn.addEventListener('click', saveSessionSchedule);
+    }
+    
+
     // Product image preview
     const productImageInput = document.getElementById('product-image-file');
     if (productImageInput) {
@@ -7218,9 +7499,7 @@ app.Run();
                                 <button class="btn btn-sm btn-outline-primary view-user-btn" data-id="${user.id}">
                                     <i class="bi bi-eye"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger delete-user-btn" data-id="${user.id}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                
                             </div>
                         </td>
                     `;
@@ -7386,92 +7665,99 @@ app.Run();
                 }
             });
         }
-        // Load bookings
-        async function loadBookings() {
-            try {
-                const bookingsStartDate = document.getElementById('bookings-start-date');
-                const bookingsEndDate = document.getElementById('bookings-end-date');
-                const bookingsStatusFilter = document.getElementById('bookings-status-filter');
-                
-                const startDate = bookingsStartDate ? bookingsStartDate.value : null;
-                const endDate = bookingsEndDate ? bookingsEndDate.value : null;
-                const status = bookingsStatusFilter ? bookingsStatusFilter.value : null;
-                
-                let bookings = await apiService.getAllBookings(
-                    startDate ? new Date(startDate) : null,
-                    endDate ? new Date(endDate) : null
-                );
-                
-                // Filter by status if selected
-                if (status) {
-                    bookings = bookings.filter(booking => booking.status === status);
-                }
-                
-                const tableBody = document.querySelector('#bookings-table tbody');
-                if (!tableBody) return;
-                
-                tableBody.innerHTML = '';
-                
-                if (bookings.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No bookings found</td></tr>';
-                    return;
-                }
-                
-                bookings.forEach(booking => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${booking.id}</td>
-                        <td>${booking.className ? booking.className : booking.sessionName}</td>
-                        <td>${booking.type}</td>
-                        <td>${booking.className ? booking.className : booking.sessionName}</td>
-                        <td>${booking.trainerName}</td>
-                        <td>${uiHelper.formatDate(booking.startTime)}</td>
-                        <td>
-                            <span class="badge ${
-                                booking.status === 'Confirmed' ? 'bg-success' : 
-                                booking.status === 'Cancelled' ? 'bg-danger' : 'bg-info'
-                            }">
-                                ${booking.status}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary view-booking-btn" data-id="${booking.id}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                ${booking.status === 'Confirmed' ? `
-                                    <button class="btn btn-sm btn-outline-danger cancel-booking-btn" data-id="${booking.id}">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                ` : ''}
-                            </div>
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
-                // Add event listeners
-                document.querySelectorAll('.view-booking-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const bookingId = this.getAttribute('data-id');
-                        viewBookingDetails(bookingId);
-                    });
-                });
-                document.querySelectorAll('.cancel-booking-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const bookingId = this.getAttribute('data-id');
-                        cancelBooking(bookingId);
-                    });
-                });
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                const tableBody = document.querySelector('#bookings-table tbody');
-                if (tableBody) {
-                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading bookings</td></tr>';
-                }
-            }
+       async function loadBookings() {
+    try {
+        const bookingsStartDate = document.getElementById('bookings-start-date');
+        const bookingsEndDate = document.getElementById('bookings-end-date');
+        const bookingsStatusFilter = document.getElementById('bookings-status-filter');
+        
+        const startDate = bookingsStartDate ? bookingsStartDate.value : null;
+        const endDate = bookingsEndDate ? bookingsEndDate.value : null;
+        const status = bookingsStatusFilter ? bookingsStatusFilter.value : null;
+        
+        let bookings = await apiService.getAllBookings(
+            startDate ? new Date(startDate) : null,
+            endDate ? new Date(endDate) : null
+        );
+        
+        // Filter by status if selected
+        if (status) {
+            bookings = bookings.filter(booking => booking.status === status);
         }
+        
+        const tableBody = document.querySelector('#bookings-table tbody');
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        if (bookings.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No bookings found</td></tr>';
+            return;
+        }
+        
+        bookings.forEach(booking => {
+            const row = document.createElement('tr');
+            
+            // Debug logging to check the data structure
+            console.log('Booking data:', booking);
+            
+            row.innerHTML = `
+                <td>${booking.id}</td>
+                <td>${booking.userName || booking.User?.Name || 'N/A'}</td>
+                <td>${booking.type}</td>
+                <td>${booking.type === 'Class' ? booking.className : booking.sessionName || 'N/A'}</td>
+                <td>${booking.trainerName || 'N/A'}</td>
+                <td>${uiHelper.formatDate(booking.startTime)}</td>
+                <td>
+                    <span class="badge ${
+                        booking.status === 'Confirmed' ? 'bg-success' : 
+                        booking.status === 'Cancelled' ? 'bg-danger' : 'bg-info'
+                    }">
+                        ${booking.status}
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary view-booking-btn" data-id="${booking.id}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        ${booking.status === 'Confirmed' ? `
+                            <button class="btn btn-sm btn-outline-danger cancel-booking-btn" data-id="${booking.id}">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Add event listeners
+        document.querySelectorAll('.view-booking-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-id');
+                viewBookingDetails(bookingId);
+            });
+        });
+        document.querySelectorAll('.cancel-booking-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-id');
+                cancelBooking(bookingId);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading bookings:', error);
+        const tableBody = document.querySelector('#bookings-table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading bookings</td></tr>';
+        }
+    }
+}
+
+
+
+
         // View booking details
         async function viewBookingDetails(bookingId) {
             try {
@@ -7703,93 +7989,107 @@ app.Run();
                 uiHelper.showAlert('Error loading class details', 'danger');
             }
         }
-        // View class schedules
-        async function viewClassSchedules(classId) {
-            try {
-                const classObj = await apiService.getClassById(classId);
-                const schedules = await apiService.getClassSchedules(classId);
-                
-                // Create a modal to show class schedules
-                const modalHtml = `
-                    <div class="modal fade" id="classSchedulesModal" tabindex="-1" aria-labelledby="classSchedulesModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="classSchedulesModalLabel">Schedules for ${classObj.name}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
+    async function viewClassSchedules(classId) {
+    try {
+        const classObj = await apiService.getClassById(classId);
+        const schedules = await apiService.getClassSchedules(classId);
+        
+        // Create a modal to show class schedules
+        const modalHtml = `
+            <div class="modal fade" id="classSchedulesModal" tabindex="-1" aria-labelledby="classSchedulesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-between align-items-center">
+                            <h5 class="modal-title" id="classSchedulesModalLabel">Schedules for ${classObj.name}</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="create-class-schedule-btn" data-class-id="${classId}">
+                                <i class="bi bi-plus-circle"></i> Create Schedule
+                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Location</th>
+                                            <th>Available Slots</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${schedules.length === 0 ? 
+                                            '<tr><td colspan="6" class="text-center">No schedules found</td></tr>' :
+                                            schedules.map(schedule => `
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Start Time</th>
-                                                    <th>End Time</th>
-                                                    <th>Location</th>
-                                                    <th>Available Slots</th>
-                                                    <th>Actions</th>
+                                                    <td>${schedule.id}</td>
+                                                    <td>${uiHelper.formatDate(schedule.startTime)}</td>
+                                                    <td>${uiHelper.formatDate(schedule.endTime)}</td>
+                                                    <td>${schedule.location}</td>
+                                                    <td>${schedule.availableSlots} / ${schedule.maxCapacity}</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="class">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${schedules.length === 0 ? 
-                                                    '<tr><td colspan="6" class="text-center">No schedules found</td></tr>' :
-                                                    schedules.map(schedule => `
-                                                        <tr>
-                                                            <td>${schedule.id}</td>
-                                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
-                                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
-                                                            <td>${schedule.location}</td>
-                                                            <td>${schedule.availableSlots} / ${schedule.maxCapacity}</td>
-                                                            <td>
-                                                                <div class="btn-group">
-                                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="class">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
+                                            `).join('')
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
                     </div>
-                `;
-                
-                // Add modal to DOM
-                const modalContainer = document.createElement('div');
-                modalContainer.innerHTML = modalHtml;
-                document.body.appendChild(modalContainer);
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('classSchedulesModal'));
-                modal.show();
-                
-                // Add event listeners to delete buttons
-                modalContainer.querySelectorAll('.delete-schedule-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const scheduleId = this.getAttribute('data-id');
-                        const type = this.getAttribute('data-type');
-                        deleteSchedule(scheduleId, type);
-                    });
-                });
-                
-                // Remove modal from DOM when hidden
-                document.getElementById('classSchedulesModal').addEventListener('hidden.bs.modal', function() {
-                    document.body.removeChild(modalContainer);
-                });
-            } catch (error) {
-                console.error('Error loading class schedules:', error);
-                uiHelper.showAlert('Error loading class schedules', 'danger');
-            }
+                </div>
+            </div>
+        `;
+        
+        // Add modal to DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('classSchedulesModal'));
+        modal.show();
+        
+        // Add event listeners to delete buttons
+        modalContainer.querySelectorAll('.delete-schedule-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const scheduleId = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                deleteSchedule(scheduleId, type);
+            });
+        });
+        
+        // Add event listener to create schedule button
+        const createScheduleBtn = modalContainer.querySelector('#create-class-schedule-btn');
+        if (createScheduleBtn) {
+            createScheduleBtn.addEventListener('click', function() {
+                const classId = this.getAttribute('data-class-id');
+                openCreateClassScheduleModal(classId);
+            });
         }
+        
+        // Remove modal from DOM when hidden
+        document.getElementById('classSchedulesModal').addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalContainer);
+        });
+    } catch (error) {
+        console.error('Error loading class schedules:', error);
+        uiHelper.showAlert('Error loading class schedules', 'danger');
+    }
+}
+
+       
+       
         // Delete class
         function deleteClass(classId) {
             uiHelper.confirm('Are you sure you want to delete this class? This action cannot be undone.', async function() {
@@ -8044,91 +8344,236 @@ app.Run();
                 uiHelper.showAlert('Error loading session details', 'danger');
             }
         }
-        // View session schedules
-        async function viewSessionSchedules(sessionId) {
-            try {
-                const session = await apiService.getSessionById(sessionId);
-                const schedules = await apiService.getSessionSchedules(sessionId);
-                
-                // Create a modal to show session schedules
-                const modalHtml = `
-                    <div class="modal fade" id="sessionSchedulesModal" tabindex="-1" aria-labelledby="sessionSchedulesModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="sessionSchedulesModalLabel">Schedules for ${session.name}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
+      async function viewSessionSchedules(sessionId) {
+    try {
+        const session = await apiService.getSessionById(sessionId);
+        const schedules = await apiService.getSessionSchedules(sessionId);
+        
+        // Create a modal to show session schedules
+        const modalHtml = `
+            <div class="modal fade" id="sessionSchedulesModal" tabindex="-1" aria-labelledby="sessionSchedulesModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header d-flex justify-content-between align-items-center">
+                            <h5 class="modal-title" id="sessionSchedulesModalLabel">Schedules for ${session.name}</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="create-session-schedule-btn" data-session-id="${sessionId}">
+                                <i class="bi bi-plus-circle"></i> Create Schedule
+                            </button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                            <th>Available Slots</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${schedules.length === 0 ? 
+                                            '<tr><td colspan="5" class="text-center">No schedules found</td></tr>' :
+                                            schedules.map(schedule => `
                                                 <tr>
-                                                    <th>ID</th>
-                                                    <th>Start Time</th>
-                                                    <th>End Time</th>
-                                                    <th>Available Slots</th>
-                                                    <th>Actions</th>
+                                                    <td>${schedule.id}</td>
+                                                    <td>${uiHelper.formatDate(schedule.startTime)}</td>
+                                                    <td>${uiHelper.formatDate(schedule.endTime)}</td>
+                                                    <td>${schedule.availableSlots} / ${schedule.maxSlots}</td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="session">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${schedules.length === 0 ? 
-                                                    '<tr><td colspan="5" class="text-center">No schedules found</td></tr>' :
-                                                    schedules.map(schedule => `
-                                                        <tr>
-                                                            <td>${schedule.id}</td>
-                                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
-                                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
-                                                            <td>${schedule.availableSlots} / ${schedule.maxSlots}</td>
-                                                            <td>
-                                                                <div class="btn-group">
-                                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="session">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
+                                            `).join('')
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
                     </div>
-                `;
-                
-                // Add modal to DOM
-                const modalContainer = document.createElement('div');
-                modalContainer.innerHTML = modalHtml;
-                document.body.appendChild(modalContainer);
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('sessionSchedulesModal'));
-                modal.show();
-                
-                // Add event listeners to delete buttons
-                modalContainer.querySelectorAll('.delete-schedule-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const scheduleId = this.getAttribute('data-id');
-                        const type = this.getAttribute('data-type');
-                        deleteSchedule(scheduleId, type);
-                    });
-                });
-                
-                // Remove modal from DOM when hidden
-                document.getElementById('sessionSchedulesModal').addEventListener('hidden.bs.modal', function() {
-                    document.body.removeChild(modalContainer);
-                });
-            } catch (error) {
-                console.error('Error loading session schedules:', error);
-                uiHelper.showAlert('Error loading session schedules', 'danger');
-            }
+                </div>
+            </div>
+        `;
+        
+        // Add modal to DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('sessionSchedulesModal'));
+        modal.show();
+        
+        // Add event listeners to delete buttons
+        modalContainer.querySelectorAll('.delete-schedule-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const scheduleId = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                deleteSchedule(scheduleId, type);
+            });
+        });
+        
+        // Add event listener to create schedule button
+        const createScheduleBtn = modalContainer.querySelector('#create-session-schedule-btn');
+        if (createScheduleBtn) {
+            createScheduleBtn.addEventListener('click', function() {
+                const sessionId = this.getAttribute('data-session-id');
+                openCreateSessionScheduleModal(sessionId);
+            });
         }
+        
+        // Remove modal from DOM when hidden
+        document.getElementById('sessionSchedulesModal').addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalContainer);
+        });
+    } catch (error) {
+        console.error('Error loading session schedules:', error);
+        uiHelper.showAlert('Error loading session schedules', 'danger');
+    }
+}
+        
+// Open Create Class Schedule Modal
+async function openCreateClassScheduleModal(classId) {
+    try {
+        // Reset form
+        const form = document.getElementById('create-class-schedule-form');
+        if (form) form.reset();
+        
+        // Set class ID
+        document.getElementById('schedule-class-id').value = classId;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('createClassScheduleModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error opening create class schedule modal:', error);
+        uiHelper.showAlert('Error opening create schedule modal', 'danger');
+    }
+}
+
+// Open Create Session Schedule Modal
+async function openCreateSessionScheduleModal(sessionId) {
+    try {
+        // Reset form
+        const form = document.getElementById('create-session-schedule-form');
+        if (form) form.reset();
+        
+        // Set session ID
+        document.getElementById('session-schedule-session-id').value = sessionId;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('createSessionScheduleModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error opening create session schedule modal:', error);
+        uiHelper.showAlert('Error opening create schedule modal', 'danger');
+    }
+}
+
+// Save Class Schedule
+async function saveClassSchedule() {
+    try {
+        const classId = document.getElementById('schedule-class-id').value;
+        const startTime = document.getElementById('schedule-start-time').value;
+        const endTime = document.getElementById('schedule-end-time').value;
+        const location = document.getElementById('schedule-location').value;
+        
+        // Validate form
+        if (!classId || !startTime || !endTime || !location) {
+            uiHelper.showAlert('Please fill all fields', 'warning');
+            return;
+        }
+        
+        // Validate date range
+        if (new Date(startTime) >= new Date(endTime)) {
+            uiHelper.showAlert('End time must be after start time', 'warning');
+            return;
+        }
+        
+        const scheduleData = {
+            classId: parseInt(classId),
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            location: location
+        };
+        
+        // Create schedule
+        await apiService.createClassSchedule(scheduleData);
+        uiHelper.showAlert('Class schedule created successfully', 'success');
+        
+        // Hide modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createClassScheduleModal'));
+        if (modal) modal.hide();
+        
+        // Refresh schedules list
+        const classSchedulesModal = document.getElementById('classSchedulesModal');
+        if (classSchedulesModal) {
+            const currentClassId = document.querySelector('#create-class-schedule-btn').getAttribute('data-class-id');
+            viewClassSchedules(currentClassId);
+        }
+    } catch (error) {
+        console.error('Error saving class schedule:', error);
+        uiHelper.showAlert('Error saving class schedule: ' + error.message, 'danger');
+    }
+}
+
+// Save Session Schedule
+async function saveSessionSchedule() {
+    try {
+        const sessionId = document.getElementById('session-schedule-session-id').value;
+        const startTime = document.getElementById('session-schedule-start-time').value;
+        const endTime = document.getElementById('session-schedule-end-time').value;
+        const availableSlots = document.getElementById('session-schedule-slots').value;
+        
+        // Validate form
+        if (!sessionId || !startTime || !endTime || !availableSlots) {
+            uiHelper.showAlert('Please fill all fields', 'warning');
+            return;
+        }
+        
+        // Validate date range
+        if (new Date(startTime) >= new Date(endTime)) {
+            uiHelper.showAlert('End time must be after start time', 'warning');
+            return;
+        }
+        
+        const scheduleData = {
+            onlineSessionId: parseInt(sessionId),
+            startTime: new Date(startTime).toISOString(),
+            endTime: new Date(endTime).toISOString(),
+            availableSlots: parseInt(availableSlots)
+        };
+        
+        // Create schedule
+        await apiService.createSessionSchedule(scheduleData);
+        uiHelper.showAlert('Session schedule created successfully', 'success');
+        
+        // Hide modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('createSessionScheduleModal'));
+        if (modal) modal.hide();
+        
+        // Refresh schedules list
+        const sessionSchedulesModal = document.getElementById('sessionSchedulesModal');
+        if (sessionSchedulesModal) {
+            const currentSessionId = document.querySelector('#create-session-schedule-btn').getAttribute('data-session-id');
+            viewSessionSchedules(currentSessionId);
+        }
+    } catch (error) {
+        console.error('Error saving session schedule:', error);
+        uiHelper.showAlert('Error saving session schedule: ' + error.message, 'danger');
+    }
+}
+
+        
         // Delete session
         function deleteSession(sessionId) {
             uiHelper.confirm('Are you sure you want to delete this session? This action cannot be undone.', async function() {
@@ -8358,66 +8803,74 @@ app.Run();
                 }
             }
         }
+        
         // View trainer details
-        async function viewTrainerDetails(trainerId) {
-            try {
-                const trainer = await apiService.getTrainerById(trainerId);
-                
-                // Create a modal to show trainer details
-                const modalHtml = `
-                    <div class="modal fade" id="trainerDetailsModal" tabindex="-1" aria-labelledby="trainerDetailsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="trainerDetailsModalLabel">Trainer Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <strong>ID:</strong> ${trainer.id}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Name:</strong> ${trainer.name}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Specialization:</strong> ${trainer.specialization}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Experience:</strong> ${trainer.experienceYears} years
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Certifications:</strong> ${trainer.certifications || 'N/A'}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Bio:</strong> ${trainer.bio}
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
+      async function viewTrainerDetails(trainerId) {
+    try {
+        const trainer = await apiService.getTrainerById(trainerId);
+        
+        // Create a modal to show trainer details
+        const modalHtml = `
+            <div class="modal fade" id="trainerDetailsModal" tabindex="-1" aria-labelledby="trainerDetailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="trainerDetailsModalLabel">Trainer Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <strong>ID:</strong> ${trainer.id}
                             </div>
+                            <div class="mb-3">
+                                <strong>Name:</strong> ${trainer.name}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Specialization:</strong> ${trainer.specialization}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Experience:</strong> ${trainer.experienceYears} years
+                            </div>
+                            <div class="mb-3">
+                                <strong>Certifications:</strong> ${trainer.certifications || 'N/A'}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Bio:</strong> ${trainer.bio}
+                            </div>
+                            ${trainer.imageUrl ? `
+                                <div class="mb-3">
+                                    <strong>Image:</strong><br>
+                                    <img src="${getImageUrl(trainer.imageUrl)}" alt="${trainer.name}" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
-                `;
-                
-                // Add modal to DOM
-                const modalContainer = document.createElement('div');
-                modalContainer.innerHTML = modalHtml;
-                document.body.appendChild(modalContainer);
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('trainerDetailsModal'));
-                modal.show();
-                
-                // Remove modal from DOM when hidden
-                document.getElementById('trainerDetailsModal').addEventListener('hidden.bs.modal', function() {
-                    document.body.removeChild(modalContainer);
-                });
-            } catch (error) {
-                console.error('Error loading trainer details:', error);
-                uiHelper.showAlert('Error loading trainer details', 'danger');
-            }
-        }
+                </div>
+            </div>
+        `;
+        
+        // Add modal to DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('trainerDetailsModal'));
+        modal.show();
+        
+        // Remove modal from DOM when hidden
+        document.getElementById('trainerDetailsModal').addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalContainer);
+        });
+    } catch (error) {
+        console.error('Error loading trainer details:', error);
+        uiHelper.showAlert('Error loading trainer details', 'danger');
+    }
+}
+
         // View trainer classes
         async function viewTrainerClasses(trainerId) {
             try {
@@ -8573,8 +9026,7 @@ app.Run();
                 }
             });
         }
-        // Open trainer modal (create or edit)
-        async function openTrainerModal(trainerId = null) {
+    async function openTrainerModal(trainerId = null) {
     try {
         // Reset form
         const trainerForm = document.getElementById('trainer-form');
@@ -8583,9 +9035,12 @@ app.Run();
         const trainerIdInput = document.getElementById('trainer-id');
         if (trainerIdInput) trainerIdInput.value = '';
         
-        // Clear image preview
+        // Clear image preview but keep track of existing image
         const imagePreview = document.getElementById('trainer-image-preview');
         if (imagePreview) imagePreview.innerHTML = '';
+        
+        // Store existing image URL for update scenario
+        let existingImageUrl = '';
         
         const modalLabel = document.getElementById('trainerModalLabel');
         if (!modalLabel) return;
@@ -8594,19 +9049,33 @@ app.Run();
             // Edit mode
             modalLabel.textContent = 'Edit Trainer';
             
-            // Load trainer data
-            const trainer = await apiService.getTrainerById(trainerId);
-            
-            if (trainerIdInput) trainerIdInput.value = trainer.id;
-            document.getElementById('trainer-name').value = trainer.name;
-            document.getElementById('trainer-specialization').value = trainer.specialization;
-            document.getElementById('trainer-experience').value = trainer.experienceYears;
-            document.getElementById('trainer-certifications').value = trainer.certifications || '';
-            document.getElementById('trainer-bio').value = trainer.bio;
-            
-            // Show existing image if available
-            if (trainer.imageUrl) {
-                imagePreview.innerHTML = `<img src="${trainer.imageUrl}" class="img-thumbnail" style="max-width: 200px;">`;
+            try {
+                // Load trainer data
+                const trainer = await apiService.getTrainerById(trainerId);
+                
+                if (trainerIdInput) trainerIdInput.value = trainer.id;
+                document.getElementById('trainer-name').value = trainer.name;
+                document.getElementById('trainer-specialization').value = trainer.specialization;
+                document.getElementById('trainer-experience').value = trainer.experienceYears;
+                document.getElementById('trainer-certifications').value = trainer.certifications || '';
+                document.getElementById('trainer-bio').value = trainer.bio;
+                
+                // Store existing image URL
+                existingImageUrl = trainer.imageUrl || '';
+                
+                // Show existing image if available
+                if (trainer.imageUrl) {
+                    imagePreview.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <img src="${getImageUrl(trainer.imageUrl)}" alt="${trainer.name}" class="img-thumbnail me-2" style="max-width: 100px;">
+                            <small class="text-muted">Current image</small>
+                        </div>
+                        <input type="hidden" id="existing-image-url" value="${trainer.imageUrl}">
+                    `;
+                }
+            } catch (error) {
+                uiHelper.showAlert('Trainer not found', 'danger');
+                return;
             }
         } else {
             // Create mode
@@ -8622,8 +9091,8 @@ app.Run();
     }
 }
 
-        // Save trainer
-       async function saveTrainer() {
+
+      async function saveTrainer() {
     try {
         const trainerIdInput = document.getElementById('trainer-id');
         const trainerId = trainerIdInput ? trainerIdInput.value : null;
@@ -8636,10 +9105,21 @@ app.Run();
             bio: document.getElementById('trainer-bio').value
         };
         
-        // Get the image file if provided
+        // Get image file
         const imageFileInput = document.getElementById('trainer-image-file');
         const imageFile = imageFileInput && imageFileInput.files.length > 0 ? imageFileInput.files[0] : null;
-
+        
+        // Validate form
+        const trainerForm = document.getElementById('trainer-form');
+        if (!formValidator.validateForm(trainerForm, {
+            'trainer-name': { required: true },
+            'trainer-specialization': { required: true },
+            'trainer-experience': { required: true, min: 0 },
+            'trainer-bio': { required: true }
+        })) {
+            return;
+        }
+        
         if (trainerId) {
             // Update existing trainer
             await apiService.updateTrainer(parseInt(trainerId), trainerData, imageFile);
@@ -8827,16 +9307,18 @@ app.Run();
             });
         }
         // Toggle membership status
-        async function toggleMembershipStatus(membershipId, isActive) {
-            try {
-                await apiService.toggleMembershipTypeStatus(membershipId, isActive);
-                uiHelper.showAlert(`Membership type ${isActive ? 'activated' : 'deactivated'} successfully`, 'success');
-                loadMemberships();
-            } catch (error) {
-                console.error('Error toggling membership status:', error);
-                uiHelper.showAlert('Error toggling membership status', 'danger');
-            }
-        }
+       async function toggleMembershipStatus(membershipId, isActive) {
+    try {
+        await apiService.toggleMembershipTypeStatus(membershipId, isActive);
+        uiHelper.showAlert(`Membership type ${isActive ? 'activated' : 'deactivated'} successfully`, 'success');
+        loadMemberships();
+    } catch (error) {
+        console.error('Error toggling membership status:', error);
+        uiHelper.showAlert('Error toggling membership status', 'danger');
+    }
+}
+
+
         // Open membership modal (create or edit)
         async function openMembershipModal(membershipId = null) {
     try {
@@ -8884,53 +9366,92 @@ app.Run();
 }
 
         // Save membership type
-        async function saveMembership() {
-            try {
-                const membershipIdInput = document.getElementById('membership-id');
-                const membershipId = membershipIdInput ? membershipIdInput.value : null;
-                
-                const membershipData = {
-                    name: document.getElementById('membership-name').value,
-                    description: document.getElementById('membership-description').value,
-                    durationMonths: parseInt(document.getElementById('membership-duration').value),
-                    totalHours: parseFloat(document.getElementById('membership-hours').value),
-                    price: parseFloat(document.getElementById('membership-price').value),
-                    isActive: document.getElementById('membership-active').checked
-                };
-                
-                // Validate form
-                const membershipForm = document.getElementById('membership-form');
-                if (!formValidator.validateForm(membershipForm, {
-                    'membership-name': { required: true },
-                    'membership-description': { required: true },
-                    'membership-duration': { required: true, min: 1 },
-                    'membership-hours': { required: true, min: 1 },
-                    'membership-price': { required: true, min: 0 }
-                })) {
-                    return;
-                }
-                
-                if (membershipId) {
-                    // Update existing membership type
-                    await apiService.updateMembershipType(parseInt(membershipId), membershipData);
-                    uiHelper.showAlert('Membership type updated successfully', 'success');
-                } else {
-                    // Create new membership type
-                    await apiService.createMembershipType(membershipData);
-                    uiHelper.showAlert('Membership type created successfully', 'success');
-                }
-                
-                // Hide modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('membershipModal'));
-                if (modal) modal.hide();
-                
-                // Reload membership types
-                loadMemberships();
-            } catch (error) {
-                console.error('Error saving membership type:', error);
-                uiHelper.showAlert('Error saving membership type', 'danger');
-            }
+async function saveMembership() {
+    try {
+        const membershipIdInput = document.getElementById('membership-id');
+        const membershipId = membershipIdInput ? membershipIdInput.value : null;
+        
+        // Get form values and ensure they're properly formatted
+        const name = document.getElementById('membership-name').value.trim();
+        const description = document.getElementById('membership-description').value.trim();
+        const durationMonths = parseInt(document.getElementById('membership-duration').value);
+        const totalHours = parseFloat(document.getElementById('membership-hours').value);
+        const price = parseFloat(document.getElementById('membership-price').value);
+        
+        // Validate each field individually
+        if (!name) {
+            uiHelper.showAlert('Name is required', 'warning');
+            return;
         }
+        
+        if (!description) {
+            uiHelper.showAlert('Description is required', 'warning');
+            return;
+        }
+        
+        if (isNaN(durationMonths) || durationMonths < 1 || durationMonths > 12) {
+            uiHelper.showAlert('Duration must be between 1 and 12 months', 'warning');
+            return;
+        }
+        
+        if (isNaN(totalHours) || totalHours < 1 || totalHours > 100) {
+            uiHelper.showAlert('Total hours must be between 1 and 100', 'warning');
+            return;
+        }
+        
+        if (isNaN(price) || price < 0) {
+            uiHelper.showAlert('Price must be a positive number', 'warning');
+            return;
+        }
+        
+        // Create the data object with the correct property names (matching the backend DTO)
+        const membershipData = {
+            name: name,                    // Using camelCase to match JavaScript convention
+            description: description,
+            durationMonths: durationMonths,
+            totalHours: totalHours,
+            price: price
+        };
+        
+        console.log('Sending membership data:', JSON.stringify(membershipData, null, 2));
+        
+        if (membershipId) {
+            // Update existing membership type
+            await apiService.updateMembershipType(parseInt(membershipId), membershipData);
+            uiHelper.showAlert('Membership type updated successfully', 'success');
+        } else {
+            // Create new membership type
+            await apiService.createMembershipType(membershipData);
+            uiHelper.showAlert('Membership type created successfully', 'success');
+        }
+        
+        // Hide modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('membershipModal'));
+        if (modal) modal.hide();
+        
+        // Reload membership types
+        loadMemberships();
+    } catch (error) {
+        console.error('Error saving membership type:', error);
+        
+        // Try to extract more detailed error information
+        let errorMessage = 'Error saving membership type';
+        if (error.message) {
+            errorMessage += ': ' + error.message;
+        }
+        
+        // If the error contains validation errors, show them
+        if (error.errors) {
+            // Handle validation errors
+            const validationErrors = Object.values(error.errors).flat();
+            errorMessage += ': ' + validationErrors.join(', ');
+        }
+        
+        uiHelper.showAlert(errorMessage, 'danger');
+    }
+}
+
+
         // Load products
         async function loadProducts() {
             try {
@@ -9014,72 +9535,74 @@ app.Run();
                 }
             }
         }
-        // View product details
+        
+        
         async function viewProductDetails(productId) {
-            try {
-                const product = await apiService.getProductById(productId);
-                
-                // Create a modal to show product details
-                const modalHtml = `
-                    <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="productDetailsModalLabel">Product Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <strong>ID:</strong> ${product.id}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Name:</strong> ${product.name}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Description:</strong> ${product.description}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Category:</strong> ${product.category}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Price:</strong> ${uiHelper.formatCurrency(product.price)}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Stock Quantity:</strong> ${product.stockQuantity}
-                                    </div>
-                                    ${product.imageUrl ? `
-                                        <div class="mb-3">
-                                            <strong>Image:</strong><br>
-                                            <img src="${product.imageUrl}" alt="${product.name}" class="img-thumbnail" style="max-width: 200px;">
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
+    try {
+        const product = await apiService.getProductById(productId);
+        
+        // Create a modal to show product details
+        const modalHtml = `
+            <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-labelledby="productDetailsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="productDetailsModalLabel">Product Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <strong>ID:</strong> ${product.id}
                             </div>
+                            <div class="mb-3">
+                                <strong>Name:</strong> ${product.name}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Description:</strong> ${product.description}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Category:</strong> ${product.category}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Price:</strong> ${uiHelper.formatCurrency(product.price)}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Stock Quantity:</strong> ${product.stockQuantity}
+                            </div>
+                            ${product.imageUrl ? `
+                                <div class="mb-3">
+                                    <strong>Image:</strong><br>
+                                    <img src="${getImageUrl(product.imageUrl)}" alt="${product.name}" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
-                `;
-                
-                // Add modal to DOM
-                const modalContainer = document.createElement('div');
-                modalContainer.innerHTML = modalHtml;
-                document.body.appendChild(modalContainer);
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
-                modal.show();
-                
-                // Remove modal from DOM when hidden
-                document.getElementById('productDetailsModal').addEventListener('hidden.bs.modal', function() {
-                    document.body.removeChild(modalContainer);
-                });
-            } catch (error) {
-                console.error('Error loading product details:', error);
-                uiHelper.showAlert('Error loading product details', 'danger');
-            }
-        }
+                </div>
+            </div>
+        `;
+        
+        // Add modal to DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+        modal.show();
+        
+        // Remove modal from DOM when hidden
+        document.getElementById('productDetailsModal').addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modalContainer);
+        });
+    } catch (error) {
+        console.error('Error loading product details:', error);
+        uiHelper.showAlert('Error loading product details', 'danger');
+    }
+}
+
         // Delete product
         function deleteProduct(productId) {
             uiHelper.confirm('Are you sure you want to delete this product? This action cannot be undone.', async function() {
@@ -9100,8 +9623,8 @@ app.Run();
                 updateProductStock(productId, parseInt(newStock));
             }
         }
-        // Open product modal (create or edit)
-        async function openProductModal(productId = null) {
+       
+       async function openProductModal(productId = null) {
     try {
         // Reset form
         const productForm = document.getElementById('product-form');
@@ -9133,7 +9656,7 @@ app.Run();
             
             // Show existing image if available
             if (product.imageUrl) {
-                imagePreview.innerHTML = `<img src="${product.imageUrl}" class="img-thumbnail" style="max-width: 200px;">`;
+                imagePreview.innerHTML = `<img src="${getImageUrl(product.imageUrl)}" alt="${product.name}" class="img-thumbnail" style="max-width: 200px;">`;
             }
         } else {
             // Create mode
@@ -9149,8 +9672,8 @@ app.Run();
     }
 }
         
-        // Save product
-        async function saveProduct() {
+  
+async function saveProduct() {
     try {
         const productIdInput = document.getElementById('product-id');
         const productId = productIdInput ? productIdInput.value : null;
@@ -9160,9 +9683,12 @@ app.Run();
             description: document.getElementById('product-description').value,
             category: document.getElementById('product-category').value,
             price: parseFloat(document.getElementById('product-price').value),
-            stockQuantity: parseInt(document.getElementById('product-stock').value),
-            imageUrl: document.getElementById('product-image').value
+            stockQuantity: parseInt(document.getElementById('product-stock').value)
         };
+        
+        // Get image file
+        const imageFileInput = document.getElementById('product-image-file');
+        const imageFile = imageFileInput && imageFileInput.files.length > 0 ? imageFileInput.files[0] : null;
         
         // Validate form
         const productForm = document.getElementById('product-form');
@@ -9178,11 +9704,11 @@ app.Run();
         
         if (productId) {
             // Update existing product
-            await apiService.updateProduct(parseInt(productId), productData);
+            await apiService.updateProduct(parseInt(productId), productData, imageFile);
             uiHelper.showAlert('Product updated successfully', 'success');
         } else {
             // Create new product
-            await apiService.createProduct(productData);
+            await apiService.createProduct(productData, imageFile);
             uiHelper.showAlert('Product created successfully', 'success');
         }
         
@@ -9877,6 +10403,7 @@ app.Run();
     </script>
 </body>
 </html>
+
 // Document Ready Function
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
@@ -9907,44 +10434,78 @@ const apiService = {
     baseUrl: 'https://localhost:7182/api',
     
     // Generic request function
-    async request(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
-        const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-        
-        // Add authorization header if token exists
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            defaultOptions.headers.Authorization = `Bearer ${token}`;
+   // In apiService object
+async request(endpoint, options = {}) {
+    const url = `${this.baseUrl}${endpoint}`;
+    
+    // For FormData, don't set Content-Type header, let the browser set it
+    const isFormData = options.body instanceof FormData;
+    
+    const defaultOptions = {
+        headers: isFormData ? {} : {
+            'Content-Type': 'application/json'
+        }
+    };
+    
+    // Add authorization header if token exists
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        defaultOptions.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const finalOptions = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+            ...defaultOptions.headers,
+            ...options.headers
+        }
+    };
+    
+    try {
+        console.log(`Making ${finalOptions.method || 'GET'} request to:`, url);
+        if (finalOptions.body) {
+            console.log('Request body:', finalOptions.body);
         }
         
-        const finalOptions = {
-            ...defaultOptions,
-            ...options,
-            headers: {
-                ...defaultOptions.headers,
-                ...options.headers
-            }
-        };
+        const response = await fetch(url, finalOptions);
         
-        try {
-            const response = await fetch(url, finalOptions);
+        // Log response status
+        console.log('Response status:', response.status);
+        
+        // Handle non-JSON responses (like 404, 500 errors)
+        if (!response.ok) {
+            let errorData;
+            let responseText;
             
-            // Handle non-JSON responses (like 404, 500 errors)
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            try {
+                // Try to parse as JSON first
+                responseText = await response.text();
+                errorData = JSON.parse(responseText);
+                console.error('Error response data:', errorData);
+            } catch (e) {
+                // If we can't parse the error response as JSON, create a generic error
+                console.error('Could not parse error response as JSON:', e);
+                errorData = {
+                    message: `HTTP error! status: ${response.status}`,
+                    status: response.status
+                };
             }
             
-            return await response.json();
-        } catch (error) {
-            console.error('API request failed:', error);
+            // Create a more detailed error object
+            const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            error.status = response.status;
+            error.errors = errorData.errors; // Pass through validation errors
+            
             throw error;
         }
-    },
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+    }
+},
     
     // Authentication methods
     async login(email, password) {
@@ -9987,19 +10548,37 @@ const apiService = {
     return this.request(`/membershiptypes/${id}`);
 },
     
-    async createMembershipType(membershipData) {
-        return this.request('/membershiptypes', {
+    // In apiService object
+
+async createMembershipType(membershipData) {
+    try {
+        console.log('Creating membership type with data:', membershipData);
+        const response = await this.request('/membershiptypes', {
             method: 'POST',
             body: JSON.stringify(membershipData)
         });
-    },
-    
-    async updateMembershipType(id, membershipData) {
-        return this.request(`/membershiptypes/${id}`, {
+        console.log('Create membership type response:', response);
+        return response;
+    } catch (error) {
+        console.error('Error in createMembershipType:', error);
+        throw error;
+    }
+},
+
+async updateMembershipType(id, membershipData) {
+    try {
+        console.log('Updating membership type with data:', membershipData);
+        const response = await this.request(`/membershiptypes/${id}`, {
             method: 'PUT',
             body: JSON.stringify(membershipData)
         });
-    },
+        console.log('Update membership type response:', response);
+        return response;
+    } catch (error) {
+        console.error('Error in updateMembershipType:', error);
+        throw error;
+    }
+},
     
     async deleteMembershipType(id) {
         return this.request(`/membershiptypes/${id}`, {
@@ -10007,10 +10586,10 @@ const apiService = {
         });
     },
     
-    async toggleMembershipTypeStatus(id, isActive) {
+   async toggleMembershipTypeStatus(id, isActive) {
     return this.request(`/membershiptypes/${id}/toggle`, {
         method: 'PATCH',
-        body: JSON.stringify(isActive)  // Send just the boolean value, not an object
+        body: JSON.stringify(isActive)  // Send just the boolean value
     });
 },
     
@@ -10060,6 +10639,22 @@ const apiService = {
         });
     },
     
+
+    // Class Schedule methods
+async createClassSchedule(scheduleData) {
+    return this.request('/classes/schedules', {
+        method: 'POST',
+        body: JSON.stringify(scheduleData)
+    });
+},
+
+// Session Schedule methods
+async createSessionSchedule(scheduleData) {
+    return this.request('/onlinesessions/schedules', {
+        method: 'POST',
+        body: JSON.stringify(scheduleData)
+    });
+},
     // Sessions methods
     async getSessions() {
         return this.request('/onlinesessions');
@@ -10115,16 +10710,17 @@ const apiService = {
         return this.request(`/trainers/${id}`);
     },
     
-    // Update createTrainer method
+  // In apiService object, update createTrainer and updateTrainer methods
+
 async createTrainer(trainerData, imageFile = null) {
     const formData = new FormData();
     
-    // Add all trainer data fields to FormData
-    for (const key in trainerData) {
-        if (trainerData[key] !== null && trainerData[key] !== undefined) {
-            formData.append(key, trainerData[key]);
-        }
-    }
+    // Append all trainer data with correct casing
+    formData.append('Name', trainerData.name);
+    formData.append('Specialization', trainerData.specialization);
+    formData.append('ExperienceYears', trainerData.experienceYears);
+    formData.append('Certifications', trainerData.certifications || '');
+    formData.append('Bio', trainerData.bio);
     
     // Add image file if provided
     if (imageFile) {
@@ -10134,7 +10730,7 @@ async createTrainer(trainerData, imageFile = null) {
     return this.request('/trainers', {
         method: 'POST',
         body: formData,
-        headers: {} // Let the browser set the Content-Type for multipart/form-data
+        headers: {} // Let browser set Content-Type for multipart/form-data
     });
 },
 
@@ -10142,12 +10738,12 @@ async createTrainer(trainerData, imageFile = null) {
 async updateTrainer(id, trainerData, imageFile = null) {
     const formData = new FormData();
     
-    // Add all trainer data fields to FormData
-    for (const key in trainerData) {
-        if (trainerData[key] !== null && trainerData[key] !== undefined) {
-            formData.append(key, trainerData[key]);
-        }
-    }
+    // Append all trainer data with correct casing
+    formData.append('Name', trainerData.name);
+    formData.append('Specialization', trainerData.specialization);
+    formData.append('ExperienceYears', trainerData.experienceYears);
+    formData.append('Certifications', trainerData.certifications || '');
+    formData.append('Bio', trainerData.bio);
     
     // Add image file if provided
     if (imageFile) {
@@ -10157,7 +10753,7 @@ async updateTrainer(id, trainerData, imageFile = null) {
     return this.request(`/trainers/${id}`, {
         method: 'PUT',
         body: formData,
-        headers: {} // Let the browser set the Content-Type for multipart/form-data
+        headers: {} // Let browser set Content-Type for multipart/form-data
     });
 },
 
@@ -10212,16 +10808,15 @@ async updateTrainer(id, trainerData, imageFile = null) {
         return this.request(`/products/category/${category}`);
     },
     
- // Update createProduct method
-async createProduct(productData, imageFile = null) {
+ async createProduct(productData, imageFile = null) {
     const formData = new FormData();
     
-    // Add all product data fields to FormData
-    for (const key in productData) {
-        if (productData[key] !== null && productData[key] !== undefined) {
-            formData.append(key, productData[key]);
-        }
-    }
+    // Append all product data with correct casing
+    formData.append('Name', productData.name);
+    formData.append('Description', productData.description);
+    formData.append('Category', productData.category);
+    formData.append('Price', productData.price);
+    formData.append('StockQuantity', productData.stockQuantity);
     
     // Add image file if provided
     if (imageFile) {
@@ -10231,7 +10826,7 @@ async createProduct(productData, imageFile = null) {
     return this.request('/products', {
         method: 'POST',
         body: formData,
-        headers: {} // Let the browser set the Content-Type for multipart/form-data
+        headers: {} // Let browser set Content-Type for multipart/form-data
     });
 },
 
@@ -10239,12 +10834,12 @@ async createProduct(productData, imageFile = null) {
 async updateProduct(id, productData, imageFile = null) {
     const formData = new FormData();
     
-    // Add all product data fields to FormData
-    for (const key in productData) {
-        if (productData[key] !== null && productData[key] !== undefined) {
-            formData.append(key, productData[key]);
-        }
-    }
+    // Append all product data with correct casing
+    formData.append('Name', productData.name);
+    formData.append('Description', productData.description);
+    formData.append('Category', productData.category);
+    formData.append('Price', productData.price);
+    formData.append('StockQuantity', productData.stockQuantity);
     
     // Add image file if provided
     if (imageFile) {
@@ -10254,7 +10849,7 @@ async updateProduct(id, productData, imageFile = null) {
     return this.request(`/products/${id}`, {
         method: 'PUT',
         body: formData,
-        headers: {} // Let the browser set the Content-Type for multipart/form-data
+        headers: {} // Let browser set Content-Type for multipart/form-data
     });
 },
     
@@ -10686,3 +11281,4 @@ const utils = {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 };
+

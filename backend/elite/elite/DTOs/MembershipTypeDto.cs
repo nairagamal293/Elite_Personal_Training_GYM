@@ -15,7 +15,7 @@ namespace elite.DTOs
 
     public class MembershipTypeCreateDto
     {
-        [Required, MaxLength(20)]
+        [Required, MaxLength(100)]
         public string Name { get; set; }
 
         [Required]

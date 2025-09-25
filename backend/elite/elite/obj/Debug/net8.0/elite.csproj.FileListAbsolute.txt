@@ -159,3 +159,4 @@ D:\Naira\Projects Renew\new\Elite\backend\elite\elite\obj\Debug\net8.0\staticweb
 D:\Naira\Projects Renew\new\Elite\backend\elite\elite\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 D:\Naira\Projects Renew\new\Elite\backend\elite\elite\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 D:\Naira\Projects Renew\new\Elite\backend\elite\elite\bin\Debug\net8.0\elite.staticwebassets.runtime.json
+D:\Naira\Projects Renew\new\Elite\backend\elite\elite\obj\Debug\net8.0\elite.sourcelink.json

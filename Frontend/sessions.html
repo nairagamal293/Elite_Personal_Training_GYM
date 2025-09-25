@@ -77,107 +77,288 @@
             width: 70%;
         }
         
-        /* Page Header */
+        /* Modern Page Header */
         .page-header {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, rgba(128, 0, 32, 0.9), rgba(165, 42, 42, 0.8));
             color: white;
-            padding: 60px 0;
-            margin-bottom: 40px;
+            padding: 0px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+        
+        .page-header-content {
+            position: relative;
+            z-index: 1;
         }
         
         .page-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 4px;
+            background-color: white;
+            bottom: -10px;
+            left: 0;
         }
         
         .page-subtitle {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin-bottom: 30px;
             opacity: 0.9;
+        }
+        
+        .header-buttons {
+            margin-top: 20px;
+        }
+        
+        .btn-hero {
+            padding: 12px 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+        
+        .btn-primary-custom {
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-custom {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-outline-custom:hover {
+            background-color: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        .header-decoration {
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
         }
         
         /* Filters Section */
         .filter-card {
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
             border: none;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-card:hover {
+            box-shadow: 0 12px 30px rgba(128, 0, 32, 0.1);
+        }
+        
+        .filter-card .card-body {
+            padding: 30px;
         }
         
         .filter-card .card-title {
             color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 20px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-card .card-title::before {
+            content: '\f0b0';
+            font-family: 'bootstrap-icons';
+            margin-right: 10px;
+            font-size: 1.2rem;
         }
         
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-dark);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .form-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
         }
         
         .form-select {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
             transition: all 0.3s ease;
+            font-weight: 500;
+            background-color: #f8f9fa;
         }
         
         .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.15);
+            background-color: #fff;
         }
         
         .btn-reset {
             background-color: var(--accent-color);
             color: var(--primary-color);
             border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            border-radius: 10px;
+            font-weight: 600;
             transition: all 0.3s ease;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn-reset:hover {
             background-color: var(--primary-color);
             color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-reset i {
+            margin-right: 8px;
         }
         
         /* Session Cards */
         .session-card {
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
             height: 100%;
             border: none;
+            background-color: #fff;
+            position: relative;
         }
         
         .session-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+            transform: translateY(-12px);
+            box-shadow: 0 15px 35px rgba(128, 0, 32, 0.2);
         }
         
-        .session-img {
-            height: 200px;
-            object-fit: cover;
+        .session-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
         
         .session-content {
-            padding: 20px;
+            padding: 25px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .session-icon {
+            width: 70px;
+            height: 70px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .session-card:hover .session-icon {
+            background-color: var(--primary-color);
+        }
+        
+        .session-icon i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .session-card:hover .session-icon i {
+            color: #fff;
+        }
+        
+        .session-badge {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(128, 0, 32, 0.3);
         }
         
         .session-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
             color: var(--text-dark);
+            line-height: 1.3;
+            text-align: center;
+        }
+        
+        .session-description {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: center;
+            flex-grow: 1;
         }
         
         .session-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: var(--text-light);
             font-size: 0.9rem;
         }
@@ -188,61 +369,84 @@
         }
         
         .session-price {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .session-price::before {
+            content: '\f4a5';
+            font-family: 'bootstrap-icons';
+            margin-right: 5px;
         }
         
         .btn-session {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 0.9rem;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: auto;
         }
         
         .btn-session:hover {
-            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(128, 0, 32, 0.3);
             color: white;
+        }
+        
+        .btn-session i {
+            margin-left: 8px;
         }
         
         /* Pagination */
         .pagination {
-            margin-top: 30px;
+            margin-top: 50px;
         }
         
         .page-link {
             color: var(--primary-color);
-            border-radius: 8px;
-            margin: 0 3px;
-            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin: 0 5px;
+            border: 1px solid #e9ecef;
             transition: all 0.3s ease;
+            font-weight: 500;
+            padding: 10px 15px;
         }
         
         .page-item.active .page-link {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(128, 0, 32, 0.2);
         }
         
         .page-link:hover {
-            color: var(--secondary-color);
-            background-color: var(--accent-color);
+            color: white;
+            background-color: var(--primary-color);
             border-color: var(--primary-color);
+            transform: translateY(-3px);
         }
         
         /* Modal Styles */
         .modal-content {
-            border-radius: 10px;
+            border-radius: 15px;
             border: none;
         }
         
         .modal-header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            border-radius: 10px 10px 0 0;
+            border-radius: 15px 15px 0 0;
             border-bottom: none;
         }
         
@@ -256,7 +460,7 @@
         
         .list-group-item {
             border: none;
-            padding: 10px 0;
+            padding: 12px 0;
         }
         
         .list-group-item:not(:last-child) {
@@ -271,15 +475,30 @@
             background-color: rgba(255, 152, 0, 0.1);
             color: #ff9800;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
+            padding: 15px;
         }
         
         /* Footer */
         footer {
-            background-color: var(--dark-color);
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
             color: white;
             padding: 70px 0 20px;
             margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
         }
         
         .footer-title {
@@ -287,11 +506,15 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-text {
             margin-bottom: 20px;
-            color: #ccc;
+            color: #cccccc;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a {
@@ -305,16 +528,21 @@
             margin-right: 10px;
             color: white;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a:hover {
             background-color: var(--primary-color);
             transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.4);
         }
         
         .footer-links {
             list-style: none;
             padding: 0;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-links li {
@@ -322,19 +550,31 @@
         }
         
         .footer-links a {
-            color: #ccc;
+            color: #cccccc;
             text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-block;
         }
         
         .footer-links a:hover {
-            color: var(--primary-color);
+            color: white;
             padding-left: 5px;
+        }
+        
+        .contact-info {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .contact-info p {
+            margin-bottom: 10px;
+            color: #cccccc;
         }
         
         .contact-info i {
             color: var(--primary-color);
             margin-right: 10px;
+            font-size: 1.1rem;
         }
         
         .copyright {
@@ -342,7 +582,9 @@
             padding-top: 30px;
             margin-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc;
+            color: #999999;
+            position: relative;
+            z-index: 1;
         }
         
         /* Loading Spinner */
@@ -350,48 +592,87 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 200px;
+            height: 300px;
+            flex-direction: column;
         }
         
         .spinner-border {
             color: var(--primary-color) !important;
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .spinner-text {
+            margin-top: 15px;
+            color: var(--text-light);
+            font-weight: 500;
         }
         
         /* Alert Styles */
         .alert {
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-weight: 500;
         }
         
         .alert-warning {
             background-color: rgba(255, 152, 0, 0.1);
             color: #ff9800;
+            border-left: 4px solid #ff9800;
         }
         
         .alert-info {
             background-color: rgba(33, 150, 243, 0.1);
             color: #2196f3;
+            border-left: 4px solid #2196f3;
         }
         
         .alert-danger {
             background-color: rgba(244, 67, 54, 0.1);
             color: #f44336;
+            border-left: 4px solid #f44336;
         }
         
         /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .page-title {
+                font-size: 2.8rem;
+            }
+        }
+        
         @media (max-width: 768px) {
             .page-header {
-                padding: 40px 0;
+                padding: 60px 0;
             }
             
             .page-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .session-card {
+                margin-bottom: 30px;
             }
         }
         
         @media (max-width: 576px) {
             .page-title {
-                font-size: 1.8rem;
+                font-size: 1.9rem;
+            }
+            
+            .filter-card .card-body {
+                padding: 20px;
+            }
+            
+            .session-content {
+                padding: 20px;
+            }
+            
+            .btn-hero {
+                display: block;
+                width: 100%;
+                margin-bottom: 15px;
+                margin-right: 0;
             }
         }
     </style>
@@ -448,29 +729,47 @@
         </div>
     </nav>
     
-    <!-- Page Header -->
+    <!-- Modern Page Header -->
     <div class="page-header">
-        <div class="container">
-            <h1 class="page-title">Online Sessions</h1>
-            <p class="page-subtitle">Join our virtual fitness classes from the comfort of your home</p>
+        <div class="container page-header-content">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="page-title">Online Sessions</h1>
+                    <p class="page-subtitle">Join our virtual fitness classes from the comfort of your home</p>
+                    <div class="header-buttons">
+                        <a href="register.html" class="btn btn-hero btn-primary-custom">Join Now</a>
+                        <a href="#sessions-container" class="btn btn-hero btn-outline-custom">View Sessions</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="bi bi-camera-video" style="font-size: 15rem; opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
         </div>
+        <div class="header-decoration"></div>
     </div>
   
     <!-- Main Content -->
-    <main class="container mb-5">
+    <main class="container mb-5" id="sessions-container">
         <!-- Session Filters -->
         <div class="card filter-card">
             <div class="card-body">
                 <h5 class="card-title">Filter Sessions</h5>
                 <form id="filter-form" class="row g-3">
                     <div class="col-md-3">
-                        <label for="trainer-filter" class="form-label">Trainer</label>
+                        <label for="trainer-filter" class="form-label">
+                            <i class="bi bi-person-badge"></i> Trainer
+                        </label>
                         <select class="form-select" id="trainer-filter">
                             <option value="">All Trainers</option>
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="duration-filter" class="form-label">Duration</label>
+                        <label for="duration-filter" class="form-label">
+                            <i class="bi bi-clock-history"></i> Duration
+                        </label>
                         <select class="form-select" id="duration-filter">
                             <option value="">Any Duration</option>
                             <option value="0.5">30 minutes</option>
@@ -480,7 +779,9 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label for="sort-filter" class="form-label">Sort By</label>
+                        <label for="sort-filter" class="form-label">
+                            <i class="bi bi-sort-down"></i> Sort By
+                        </label>
                         <select class="form-select" id="sort-filter">
                             <option value="name">Name</option>
                             <option value="duration">Duration</option>
@@ -488,19 +789,22 @@
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end">
-                        <button type="button" class="btn btn-reset w-100" id="reset-filters">Reset Filters</button>
+                        <button type="button" class="btn btn-reset w-100" id="reset-filters">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Filters
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
         
         <!-- Sessions Grid -->
-        <div class="row g-4" id="sessions-container">
+        <div class="row g-4" id="sessions-grid">
             <div class="col-12 text-center">
                 <div class="spinner-container">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
+                    <div class="spinner-text">Loading sessions...</div>
                 </div>
             </div>
         </div>
@@ -602,7 +906,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             // DOM elements
-            const sessionsContainer = document.getElementById('sessions-container');
+            const sessionsContainer = document.getElementById('sessions-grid');
             const pagination = document.getElementById('pagination');
             const trainerFilter = document.getElementById('trainer-filter');
             const durationFilter = document.getElementById('duration-filter');
@@ -633,6 +937,7 @@
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
+                                <div class="spinner-text">Loading sessions...</div>
                             </div>
                         </div>
                     `;
@@ -723,21 +1028,22 @@
                     const sessionCard = `
                         <div class="col-md-6 col-lg-4">
                             <div class="card session-card">
-                                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="card-img-top session-img" alt="${session.name}">
                                 <div class="card-body session-content">
+                                    <div class="session-icon">
+                                        <i class="bi bi-camera-video"></i>
+                                    </div>
+                                    <div class="session-badge">Online</div>
                                     <h5 class="card-title session-title">${session.name}</h5>
-                                    <p class="card-text">${session.description}</p>
+                                    <p class="card-text session-description">${session.description}</p>
                                     <div class="session-info">
                                         <span><i class="bi bi-clock"></i> ${session.duration}h</span>
                                         <span><i class="bi bi-person"></i> ${session.trainerName}</span>
                                     </div>
                                     <div class="session-info">
                                         <span class="session-price">$${session.price}</span>
-                                        <span><i class="bi bi-camera-video"></i> Online</span>
+                                        <span><i class="bi bi-globe"></i> Virtual</span>
                                     </div>
-                                </div>
-                                <div class="card-footer bg-transparent border-top-0">
-                                    <button class="btn btn-session w-100 view-session-btn" data-session-id="${session.id}">View Details</button>
+                                    <button class="btn btn-session w-100 view-session-btn" data-session-id="${session.id}">View Details <i class="bi bi-arrow-right"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -807,7 +1113,7 @@
                             renderPagination();
                             
                             // Scroll to top of sessions
-                            document.querySelector('.container.mb-5').scrollIntoView({ behavior: 'smooth' });
+                            document.querySelector('#sessions-container').scrollIntoView({ behavior: 'smooth' });
                         }
                     });
                 });
@@ -824,7 +1130,11 @@
                     sessionDetails.innerHTML = `
                         <div class="row">
                             <div class="col-md-5">
-                                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" class="img-fluid rounded" alt="${session.name}">
+                                <div class="text-center">
+                                    <div class="session-icon" style="width: 120px; height: 120px; margin: 0 auto 20px;">
+                                        <i class="bi bi-camera-video" style="font-size: 3rem;"></i>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-7">
                                 <h4>${session.name}</h4>
