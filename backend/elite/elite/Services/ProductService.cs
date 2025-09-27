@@ -105,24 +105,34 @@ namespace elite.Services
             };
         }
 
-        public async Task<ProductDto> UpdateProductAsync(int id, ProductCreateDto productUpdateDto)
+        public async Task<ProductDto> UpdateProductAsync(int id, ProductUpdateDto productUpdateDto)
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null) throw new ArgumentException("Product not found");
 
-            // Handle image update if provided
-            if (productUpdateDto.ImageFile != null)
+            // Handle image update ONLY if a new image is provided
+            if (productUpdateDto.ImageFile != null && productUpdateDto.ImageFile.Length > 0)
             {
-                // Delete old image if exists
-                if (!string.IsNullOrEmpty(product.ImageUrl))
+                try
                 {
-                    _imageService.DeleteImage(product.ImageUrl);
+                    // Delete old image if exists
+                    if (!string.IsNullOrEmpty(product.ImageUrl))
+                    {
+                        _imageService.DeleteImage(product.ImageUrl);
+                    }
+
+                    // Upload new image
+                    product.ImageUrl = await _imageService.UploadImageAsync(productUpdateDto.ImageFile, "products");
                 }
-
-                // Upload new image
-                product.ImageUrl = await _imageService.UploadImageAsync(productUpdateDto.ImageFile, "products");
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating image for product");
+                    // Keep existing image if upload fails
+                }
             }
+            // If no new image is provided, keep the existing image URL
 
+            // Update other properties
             product.Name = productUpdateDto.Name;
             product.Description = productUpdateDto.Description;
             product.Price = productUpdateDto.Price;

@@ -1320,10 +1320,6 @@
                     "type": "number",
                     "format": "double"
                   },
-                  "ImageFile": {
-                    "type": "string",
-                    "format": "binary"
-                  },
                   "Category": {
                     "type": "string"
                   },
@@ -1332,6 +1328,13 @@
                     "minimum": 0,
                     "type": "integer",
                     "format": "int32"
+                  },
+                  "ImageFile": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "ExistingImageUrl": {
+                    "type": "string"
                   }
                 }
               },
@@ -1345,13 +1348,16 @@
                 "Price": {
                   "style": "form"
                 },
-                "ImageFile": {
-                  "style": "form"
-                },
                 "Category": {
                   "style": "form"
                 },
                 "StockQuantity": {
+                  "style": "form"
+                },
+                "ImageFile": {
+                  "style": "form"
+                },
+                "ExistingImageUrl": {
                   "style": "form"
                 }
               }

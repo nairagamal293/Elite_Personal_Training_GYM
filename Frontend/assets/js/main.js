@@ -426,15 +426,21 @@ async updateTrainer(id, trainerData, imageFile = null) {
 },
 
 // Update updateProduct method
-async updateProduct(id, productData, imageFile = null) {
+// In apiService object
+async updateProduct(id, productData, imageFile = null, existingImageUrl = null) {
     const formData = new FormData();
     
-    // Append all product data with correct casing
+    // Append all product data
     formData.append('Name', productData.name);
     formData.append('Description', productData.description);
     formData.append('Category', productData.category);
     formData.append('Price', productData.price);
     formData.append('StockQuantity', productData.stockQuantity);
+    
+    // Add existing image URL for reference
+    if (existingImageUrl) {
+        formData.append('ExistingImageUrl', existingImageUrl);
+    }
     
     // Add image file if provided
     if (imageFile) {

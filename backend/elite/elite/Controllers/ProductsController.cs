@@ -83,10 +83,12 @@ namespace elite.Controllers
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
+
+        // Controllers/ProductsController.cs
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductCreateDto productUpdateDto)
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductUpdateDto productUpdateDto)
         {
             try
             {

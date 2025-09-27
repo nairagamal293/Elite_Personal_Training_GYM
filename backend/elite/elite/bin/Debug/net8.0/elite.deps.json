@@ -20,6 +20,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "8.0.0",
           "Microsoft.EntityFrameworkCore.Tools": "8.0.0",
           "NSwag.AspNetCore": "14.5.0",
+          "Newtonsoft.Json": "13.0.3",
           "Swashbuckle.AspNetCore": "8.0.0",
           "Swashbuckle.AspNetCore.Annotations": "8.0.0",
           "Swashbuckle.AspNetCore.Swagger": "8.0.0",
