@@ -9,18 +9,24 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css">
     <!-- Custom CSS -->
     <style>
         /* Global Styles */
         :root {
-            --primary-color: #800020;      /* Burgundy */
-            --secondary-color: #a52a2a;     /* Lighter Burgundy */
-            --accent-color: #e6b8af;        /* Light Burgundy Accent */
-            --dark-color: #212529;
-            --light-color: #f8f9fa;
-            --text-dark: #333;
-            --text-light: #666;
+            --primary-color: #5E60CE;      /* Modern Indigo */
+            --secondary-color: #5390D9;    /* Lighter Blue */
+            --accent-color: #48BFE3;       /* Teal Accent */
+            --dark-color: #0B132B;         /* Deep Dark Blue */
+            --light-color: #F8F9FA;
+            --text-dark: #0B132B;
+            --text-light: #5E6472;
+            --card-bg: #ffffff;
+            --section-bg: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #5E60CE 0%, #5390D9 100%);
+            --gradient-2: linear-gradient(135deg, #48BFE3 0%, #5E60CE 100%);
         }
         
         * {
@@ -32,22 +38,30 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
-            background-color: #fff;
+            background-color: var(--section-bg);
             overflow-x: hidden;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
         }
         
         /* Navbar Styles */
         .navbar {
             background-color: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
             padding: 15px 0;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand {
             font-weight: 700;
             font-size: 1.8rem;
             color: var(--primary-color) !important;
+            font-family: 'Playfair Display', serif;
         }
         
         .navbar-nav .nav-link {
@@ -70,6 +84,7 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+            background: var(--gradient-1);
             transition: all 0.3s ease;
         }
         
@@ -77,11 +92,13 @@
             width: 70%;
         }
         
-        /* Modern Page Header */
+        /* Page Header */
         .page-header {
-            background: linear-gradient(135deg, rgba(128, 0, 32, 0.9), rgba(165, 42, 42, 0.8));
+            background: var(--gradient-1);
+            background-image: url("images/header2.jpg");
             color: white;
-            padding: 0px 0;
+            padding: 100px 0;
+            text-align: center;
             position: relative;
             overflow: hidden;
         }
@@ -93,91 +110,41 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.3;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+            z-index: 0;
         }
         
-        .page-header-content {
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
             position: relative;
             z-index: 1;
+            font-family: 'Playfair Display', serif;
         }
         
-        .page-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            display: inline-block;
-        }
-        
-        .page-title::after {
-            content: '';
-            position: absolute;
-            width: 70px;
-            height: 4px;
-            background-color: white;
-            bottom: -10px;
-            left: 0;
-        }
-        
-        .page-subtitle {
-            font-size: 1.3rem;
+        .page-header p {
+            font-size: 1.2rem;
             max-width: 700px;
-            margin-bottom: 30px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
             opacity: 0.9;
         }
         
-        .header-buttons {
-            margin-top: 20px;
+        /* Main Content Container */
+        .main-content {
+            background-color: #fff;
+            border-radius: 20px;
+            margin: -50px auto 80px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
         }
         
-        .btn-hero {
-            padding: 12px 30px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            margin-right: 15px;
-        }
-        
-        .btn-primary-custom {
-            background-color: white;
-            color: var(--primary-color);
-            border: none;
-        }
-        
-        .btn-primary-custom:hover {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
-            transform: translateY(-3px);
-        }
-        
-        .btn-outline-custom {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-        
-        .btn-outline-custom:hover {
-            background-color: white;
-            color: var(--primary-color);
-            transform: translateY(-3px);
-        }
-        
-        .header-decoration {
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-            background-size: cover;
-        }
-        
-        /* Section Styles */
+        /* Section Title */
         .section-title {
             font-size: 2.5rem;
             font-weight: 700;
@@ -205,139 +172,210 @@
             margin-right: auto;
         }
         
-        /* Pricing Cards */
-        .pricing-card {
+        /* Membership Cards - Matching Classes Design */
+        .membership-card {
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             transition: all 0.4s ease;
             height: 100%;
             border: none;
+            background-color: var(--card-bg);
             position: relative;
         }
         
-        .pricing-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 15px 35px rgba(128, 0, 32, 0.2);
-        }
-        
-        .pricing-card::before {
+        .membership-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
         
-        .featured-badge {
-            position: absolute;
-            top: 15px;
-            right: -30px;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 5px 30px;
-            font-weight: 600;
-            transform: rotate(45deg);
-            font-size: 0.8rem;
-            z-index: 1;
-            box-shadow: 0 4px 8px rgba(128, 0, 32, 0.3);
+        .membership-card:hover::before {
+            transform: scaleX(1);
         }
         
-        .pricing-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 25px 20px;
-            text-align: center;
+        .membership-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(72, 191, 227, 0.15);
         }
         
-        .pricing-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .pricing-price {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .pricing-price span {
-            font-size: 1rem;
-            font-weight: 400;
-        }
-        
-        .pricing-body {
-            padding: 30px 20px;
-            text-align: center;
+        .membership-content {
+            padding: 30px;
+            position: relative;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
         
-        .pricing-description {
+        .membership-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(72, 191, 227, 0.2);
+        }
+        
+        .membership-card:hover .membership-icon {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(72, 191, 227, 0.3);
+        }
+        
+        .membership-icon i {
+            font-size: 2.2rem;
+            color: #fff;
+        }
+        
+        .membership-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--gradient-1);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(94, 96, 206, 0.3);
+        }
+        
+        .membership-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            line-height: 1.3;
+            text-align: center;
+        }
+        
+        .membership-description {
             color: var(--text-light);
             margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: center;
             flex-grow: 1;
         }
         
-        .pricing-features {
+        .membership-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .membership-price::before {
+            content: '\f4a5';
+            font-family: 'bootstrap-icons';
+            margin-right: 5px;
+        }
+        
+        .membership-features {
             list-style: none;
             padding: 0;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: left;
         }
         
-        .pricing-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
+        .membership-features li {
+            padding: 8px 0;
             color: var(--text-light);
+            font-size: 0.9rem;
         }
         
-        .pricing-features li:last-child {
-            border-bottom: none;
+        .membership-features li i {
+            color: var(--accent-color);
+            margin-right: 8px;
         }
         
-        .pricing-features li i {
-            color: var(--primary-color);
-            margin-right: 10px;
-        }
-        
-        .btn-pricing {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        .btn-membership {
+            background: var(--gradient-2);
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 12px 20px;
             border-radius: 30px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-top: auto;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
         }
         
-        .btn-pricing:hover {
+        .btn-membership:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(128, 0, 32, 0.3);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
             color: white;
         }
         
-        .btn-pricing-outline {
-            background-color: transparent;
+        .btn-membership i {
+            margin-left: 8px;
+        }
+        
+        /* Swiper Styles */
+        .swiper {
+            width: 100%;
+            padding: 40px 0;
+            margin-top: 20px;
+        }
+        
+        .swiper-slide {
+            height: auto;
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .swiper-button-next,
+        .swiper-button-prev {
             color: var(--primary-color);
-            border: 2px solid var(--primary-color);
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
         
-        .btn-pricing-outline:hover {
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            background-color: white;
+            color: var(--primary-color);
+        }
+        
+        .swiper-button-next:after,
+        .swiper-button-prev:after {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .swiper-pagination-bullet {
             background-color: var(--primary-color);
-            color: white;
+            opacity: 0.5;
+        }
+        
+        .swiper-pagination-bullet-active {
+            opacity: 1;
         }
         
         /* Benefits Section */
         .benefits-section {
             padding: 80px 0;
-            background-color: white;
+            background: linear-gradient(135deg, rgba(94, 96, 206, 0.03) 0%, rgba(83, 144, 217, 0.05) 100%);
             position: relative;
         }
         
@@ -348,19 +386,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23800020' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235E60CE' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             opacity: 0.5;
         }
         
         .benefit-item {
             padding: 30px;
             border-radius: 15px;
-            background-color: white;
+            background: var(--card-bg);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             height: 100%;
             position: relative;
             overflow: hidden;
+            border: 1px solid #e9ecef;
         }
         
         .benefit-item::before {
@@ -370,12 +409,12 @@
             left: 0;
             width: 5px;
             height: 100%;
-            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-2);
         }
         
         .benefit-item:hover {
             transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.1);
+            box-shadow: 0 15px 30px rgba(94, 96, 206, 0.1);
         }
         
         .benefit-icon {
@@ -425,11 +464,12 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            background: var(--card-bg);
         }
         
         .accordion-item {
             border: none;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .accordion-item:last-child {
@@ -437,7 +477,7 @@
         }
         
         .accordion-button {
-            background-color: white;
+            background-color: transparent;
             color: var(--text-dark);
             font-weight: 500;
             box-shadow: none;
@@ -456,11 +496,11 @@
         }
         
         .accordion-button::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23800020'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235E60CE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         
         .accordion-button:not(.collapsed)::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23800020'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235E60CE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         
         .accordion-body {
@@ -473,10 +513,11 @@
         .modal-content {
             border-radius: 15px;
             border: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
         .modal-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-1);
             color: white;
             border-radius: 15px 15px 0 0;
             border-bottom: none;
@@ -499,7 +540,7 @@
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.15);
+            box-shadow: 0 0 0 0.25rem rgba(94, 96, 206, 0.15);
         }
         
         .form-check-input:checked {
@@ -508,21 +549,20 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-color: var(--primary-color);
+            background: var(--gradient-2);
+            border: none;
         }
         
         .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background: var(--gradient-1);
+            color: white;
         }
         
         /* Footer */
         footer {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 100%);
             color: white;
             padding: 70px 0 20px;
-            margin-top: 80px;
             position: relative;
             overflow: hidden;
         }
@@ -571,9 +611,9 @@
         }
         
         .social-icons a:hover {
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.4);
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.4);
         }
         
         .footer-links {
@@ -610,7 +650,7 @@
         }
         
         .contact-info i {
-            color: var(--primary-color);
+            color: var(--accent-color);
             margin-right: 10px;
             font-size: 1.1rem;
         }
@@ -677,23 +717,53 @@
             .page-title {
                 font-size: 2.8rem;
             }
-        }
-        
-        @media (max-width: 768px) {
-            .page-header {
-                padding: 60px 0;
-            }
             
-            .page-title {
-                font-size: 2.2rem;
+            .main-content {
+                margin: -30px 15px 50px;
+                padding: 30px 20px;
             }
             
             .section-title {
                 font-size: 2rem;
             }
             
+            .swiper-button-next,
+            .swiper-button-prev {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .swiper-button-next:after,
+            .swiper-button-prev:after {
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 80px 0;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .main-content {
+                margin: -20px 10px 40px;
+                padding: 20px 15px;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
             .benefits-section, .faq-section {
                 padding: 60px 0;
+            }
+            
+            .swiper-button-next,
+            .swiper-button-prev {
+                display: none;
             }
         }
         
@@ -703,11 +773,11 @@
             }
             
             .section-title {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
             
-            .pricing-price {
-                font-size: 2rem;
+            .membership-price {
+                font-size: 1.2rem;
             }
             
             .btn-hero {
@@ -757,9 +827,9 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i> Account
+                            <i class="bi bi-person-circle"></i> <span id="nav-username">Account</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <ul class="dropdown-menu" id="navbar-dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="login.html">Login</a></li>
                             <li><a class="dropdown-item" href="register.html">Register</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -771,38 +841,36 @@
         </div>
     </nav>
     
-    <!-- Modern Page Header -->
+    <!-- Page Header -->
     <div class="page-header">
-        <div class="container page-header-content">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="page-title">Membership Plans</h1>
-                    <p class="page-subtitle">Flexible options designed to fit your lifestyle and fitness goals</p>
-                    <div class="header-buttons">
-                        <a href="#membership-plans" class="btn btn-hero btn-primary-custom">View Plans</a>
-                        <a href="register.html" class="btn btn-hero btn-outline-custom">Join Now</a>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="text-center">
-                        <i class="bi bi-credit-card-2-front-fill" style="font-size: 15rem; opacity: 0.2;"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="container">
+            <h1 class="page-title">Membership Plans</h1>
+            <p>Choose the perfect membership plan that fits your fitness goals and lifestyle.</p>
         </div>
-        <div class="header-decoration"></div>
     </div>
     
     <!-- Main Content -->
-    <main class="container mb-5" >
+    <main class="container main-content">
         <!-- Membership Plans -->
-        <div class="row g-4 mb-5" id="membership-plans" style="margin-top: 100px;">
+        <div class="row mb-5">
             <div class="col-12 text-center">
-                <div class="spinner-container">
+                <h2 class="section-title">Choose Your Plan</h2>
+                <p class="section-subtitle">Flexible options designed to fit your lifestyle and fitness goals</p>
+            </div>
+            <div class="col-12">
+                <div class="spinner-container" id="loading-spinner">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <div class="spinner-text">Loading membership plans...</div>
+                </div>
+                <div class="swiper membership-swiper" id="membership-swiper" style="display: none;">
+                    <div class="swiper-wrapper" id="swiper-wrapper">
+                        <!-- Membership cards will be dynamically added here -->
+                    </div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
                 </div>
             </div>
         </div>
@@ -1016,12 +1084,57 @@
     
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="assets/js/main.js"></script>
+    
+    <!-- User Authentication Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in and update navbar
+            if (typeof authService !== 'undefined' && authService.isLoggedIn()) {
+                const user = authService.getCurrentUser();
+                
+                // Update the dropdown toggle text to show the user's name
+                const dropdownToggle = document.getElementById('navbarDropdown');
+                if (dropdownToggle) {
+                    dropdownToggle.innerHTML = `<i class="bi bi-person-circle"></i> <span>${user.name}</span>`;
+                }
+
+                // Update the dropdown menu items
+                const dropdownMenu = document.getElementById('navbar-dropdown-menu');
+                if (dropdownMenu) {
+                    dropdownMenu.innerHTML = `
+                        <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                        <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+                        <li><a class="dropdown-item" href="bookings.html">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="membership.html">My Membership</a></li>
+                        <li><a class="dropdown-item" href="orders.html">Order History</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+                    `;
+
+                    // Add event listener to the logout button
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            authService.logout();
+                        });
+                    }
+                }
+            }
+        });
+    </script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             // DOM elements
             const membershipPlans = document.getElementById('membership-plans');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const membershipSwiper = document.getElementById('membership-swiper');
+            const swiperWrapper = document.getElementById('swiper-wrapper');
             const purchaseModal = new bootstrap.Modal(document.getElementById('purchaseModal'));
             const selectedPlanName = document.getElementById('selected-plan-name');
             const selectedPlanDetails = document.getElementById('selected-plan-details');
@@ -1029,40 +1142,80 @@
             const confirmPurchaseBtn = document.getElementById('confirm-purchase');
             const purchaseForm = document.getElementById('purchase-form');
             
+            // Initialize Swiper
+            let swiper;
+            
             // Load membership plans
             try {
                 const plans = await apiService.getMembershipTypes();
                 
-                membershipPlans.innerHTML = '';
+                // Clear existing content
+                swiperWrapper.innerHTML = '';
                 
                 plans.forEach((plan, index) => {
                     const isFeatured = index === 1; // Make the middle plan featured
                     const planCard = `
-                        <div class="col-md-4">
-                            <div class="card pricing-card">
-                                ${isFeatured ? '<div class="featured-badge">Most Popular</div>' : ''}
-                                <div class="pricing-header">
-                                    <h5 class="pricing-title">${plan.name}</h5>
-                                    <div class="pricing-price">$${plan.price}<span>/${plan.durationMonths} month${plan.durationMonths > 1 ? 's' : ''}</span></div>
-                                </div>
-                                <div class="pricing-body">
-                                    <p class="pricing-description">${plan.description}</p>
-                                    <ul class="pricing-features">
+                        <div class="swiper-slide">
+                            <div class="card membership-card">
+                                ${isFeatured ? '<div class="membership-badge">Most Popular</div>' : ''}
+                                <div class="membership-content">
+                                    <div class="membership-icon">
+                                        <i class="bi bi-award"></i>
+                                    </div>
+                                    <h5 class="membership-title">${plan.name}</h5>
+                                    <p class="membership-description">${plan.description}</p>
+                                    <div class="membership-price">$${plan.price}/${plan.durationMonths} month${plan.durationMonths > 1 ? 's' : ''}</div>
+                                    <ul class="membership-features">
                                         <li><i class="bi bi-check-circle-fill"></i> ${plan.totalHours} hours total</li>
-                                        <li><i class="bi bi-check-circle-fill"></i> Access to all classes</li>
-                                        <li><i class="bi bi-check-circle-fill"></i> Online booking system</li>
-                                        <li><i class="bi bi-check-circle-fill"></i> Personal trainer support</li>
-                                        <li><i class="bi bi-check-circle-fill"></i> Member discounts</li>
+                                        
                                     </ul>
                                     ${authService.isLoggedIn() ? 
-                                        `<button class="btn ${isFeatured ? 'btn-pricing' : 'btn-pricing-outline'} w-100 purchase-btn" data-plan='${JSON.stringify(plan)}'>Purchase Plan</button>` :
-                                        `<a href="register.html" class="btn ${isFeatured ? 'btn-pricing' : 'btn-pricing-outline'} w-100">Sign Up to Purchase</a>`
+                                        `<button class="btn btn-membership w-100 purchase-btn" data-plan='${JSON.stringify(plan)}'>Purchase Plan <i class="bi bi-arrow-right"></i></button>` :
+                                        `<a href="register.html" class="btn btn-membership w-100">Sign Up to Purchase <i class="bi bi-arrow-right"></i></a>`
                                     }
                                 </div>
                             </div>
                         </div>
                     `;
-                    membershipPlans.innerHTML += planCard;
+                    swiperWrapper.innerHTML += planCard;
+                });
+                
+                // Hide loading spinner and show swiper
+                loadingSpinner.style.display = 'none';
+                membershipSwiper.style.display = 'block';
+                
+                // Initialize Swiper after content is loaded
+                swiper = new Swiper('.membership-swiper', {
+                    slidesPerView: 1,
+                    spaceBetween: 30,
+                    centeredSlides: true,
+                    loop: true,
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    breakpoints: {
+                        640: {
+                            slidesPerView: 1.2,
+                            spaceBetween: 20,
+                        },
+                        768: {
+                            slidesPerView: 2,
+                            spaceBetween: 30,
+                        },
+                        992: {
+                            slidesPerView: 3,
+                            spaceBetween: 30,
+                        },
+                    },
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
                 });
                 
                 // Add event listeners to purchase buttons
@@ -1078,10 +1231,8 @@
                 
             } catch (error) {
                 console.error('Error loading membership plans:', error);
-                membershipPlans.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-warning">Unable to load membership plans at this time. Please try again later.</div>
-                    </div>
+                loadingSpinner.innerHTML = `
+                    <div class="alert alert-warning">Unable to load membership plans at this time. Please try again later.</div>
                 `;
             }
             

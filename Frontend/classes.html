@@ -9,18 +9,22 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         /* Global Styles */
         :root {
-            --primary-color: #800020;      /* Burgundy */
-            --secondary-color: #a52a2a;     /* Lighter Burgundy */
-            --accent-color: #e6b8af;        /* Light Burgundy Accent */
-            --dark-color: #212529;
-            --light-color: #f8f9fa;
-            --text-dark: #333;
-            --text-light: #666;
+            --primary-color: #5E60CE;      /* Modern Indigo */
+            --secondary-color: #5390D9;    /* Lighter Blue */
+            --accent-color: #48BFE3;       /* Teal Accent */
+            --dark-color: #0B132B;         /* Deep Dark Blue */
+            --light-color: #F8F9FA;
+            --text-dark: #0B132B;
+            --text-light: #5E6472;
+            --card-bg: #ffffff;
+            --section-bg: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #5E60CE 0%, #5390D9 100%);
+            --gradient-2: linear-gradient(135deg, #48BFE3 0%, #5E60CE 100%);
         }
         
         * {
@@ -32,22 +36,30 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
-            background-color: #fff;
+            background-color: var(--section-bg);
             overflow-x: hidden;
         }
         
-        /* Navbar Styles - Unchanged */
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        /* Navbar Styles */
         .navbar {
             background-color: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
             padding: 15px 0;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand {
             font-weight: 700;
             font-size: 1.8rem;
             color: var(--primary-color) !important;
+            font-family: 'Playfair Display', serif;
         }
         
         .navbar-nav .nav-link {
@@ -70,6 +82,7 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+            background: var(--gradient-1);
             transition: all 0.3s ease;
         }
         
@@ -77,21 +90,77 @@
             width: 70%;
         }
         
+        /* Page Header */
+        .page-header {
+            background: var(--gradient-1);
+             background-image: url("images/header2.jpg");
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
         
-        /* Filters Section - Enhanced */
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        
+        /* Main Content Container */
+        .main-content {
+            background-color: #fff;
+            border-radius: 20px;
+            margin: -50px auto 80px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Filters Section */
         .filter-card {
-            margin-top: 50px;
             border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             border: none;
             margin-bottom: 40px;
             overflow: hidden;
-            background-color: #fff;
-            transition: all 0.3s ease;
+            background-color: var(--card-bg);
+            position: relative;
         }
         
-        .filter-card:hover {
-            box-shadow: 0 12px 30px rgba(128, 0, 32, 0.1);
+        .filter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-1);
         }
         
         .filter-card .card-body {
@@ -138,13 +207,13 @@
         
         .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.15);
+            box-shadow: 0 0 0 0.25rem rgba(94, 96, 206, 0.15);
             background-color: #fff;
         }
         
         .btn-reset {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
+            background: var(--gradient-2);
+            color: white;
             border: none;
             border-radius: 10px;
             font-weight: 600;
@@ -153,33 +222,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
         }
         
         .btn-reset:hover {
-            background-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
             color: white;
-            transform: translateY(-2px);
         }
         
         .btn-reset i {
             margin-right: 8px;
         }
         
-        /* Classes Grid - Enhanced */
+        /* Classes Grid */
         .class-card {
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             transition: all 0.4s ease;
             height: 100%;
             border: none;
-            background-color: #fff;
+            background-color: var(--card-bg);
             position: relative;
-        }
-        
-        .class-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 15px 35px rgba(128, 0, 32, 0.2);
         }
         
         .class-card::before {
@@ -189,11 +254,22 @@
             left: 0;
             width: 100%;
             height: 5px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .class-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .class-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(72, 191, 227, 0.15);
         }
         
         .class-content {
-            padding: 25px;
+            padding: 30px;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -201,42 +277,39 @@
         }
         
         .class-icon {
-            width: 70px;
-            height: 70px;
-            background-color: var(--accent-color);
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
+            margin: 0 auto 25px;
             transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(72, 191, 227, 0.2);
         }
         
         .class-card:hover .class-icon {
-            background-color: var(--primary-color);
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(72, 191, 227, 0.3);
         }
         
         .class-icon i {
-            font-size: 2rem;
-            color: var(--primary-color);
-            transition: all 0.3s ease;
-        }
-        
-        .class-card:hover .class-icon i {
+            font-size: 2.2rem;
             color: #fff;
         }
         
         .class-badge {
             position: absolute;
-            top: 30px;
+            top: 20px;
             right: 20px;
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             color: white;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            box-shadow: 0 4px 8px rgba(128, 0, 32, 0.3);
+            box-shadow: 0 4px 10px rgba(94, 96, 206, 0.3);
         }
         
         .class-title {
@@ -267,7 +340,7 @@
         
         .class-info i {
             margin-right: 5px;
-            color: var(--primary-color);
+            color: var(--accent-color);
         }
         
         .class-price {
@@ -287,7 +360,7 @@
         }
         
         .btn-class {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-2);
             color: white;
             border: none;
             padding: 12px 20px;
@@ -299,11 +372,12 @@
             align-items: center;
             justify-content: center;
             margin-top: auto;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
         }
         
         .btn-class:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(128, 0, 32, 0.3);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
             color: white;
         }
         
@@ -311,7 +385,7 @@
             margin-left: 8px;
         }
         
-        /* Pagination - Enhanced */
+        /* Pagination */
         .pagination {
             margin-top: 50px;
         }
@@ -327,9 +401,9 @@
         }
         
         .page-item.active .page-link {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: var(--gradient-1);
             border-color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(128, 0, 32, 0.2);
+            box-shadow: 0 4px 10px rgba(94, 96, 206, 0.2);
         }
         
         .page-link:hover {
@@ -339,12 +413,11 @@
             transform: translateY(-3px);
         }
         
-        /* Footer - Unchanged */
+        /* Footer */
         footer {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%);
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 100%);
             color: white;
             padding: 70px 0 20px;
-            margin-top: 80px;
             position: relative;
             overflow: hidden;
         }
@@ -393,9 +466,9 @@
         }
         
         .social-icons a:hover {
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(128, 0, 32, 0.4);
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.4);
         }
         
         .footer-links {
@@ -432,7 +505,7 @@
         }
         
         .contact-info i {
-            color: var(--primary-color);
+            color: var(--accent-color);
             margin-right: 10px;
             font-size: 1.1rem;
         }
@@ -447,7 +520,7 @@
             z-index: 1;
         }
         
-        /* Loading Spinner - Enhanced */
+        /* Loading Spinner */
         .spinner-container {
             display: flex;
             justify-content: center;
@@ -468,7 +541,7 @@
             font-weight: 500;
         }
         
-        /* Alert Styles - Enhanced */
+        /* Alert Styles */
         .alert {
             border: none;
             border-radius: 10px;
@@ -493,11 +566,16 @@
             .page-title {
                 font-size: 2.8rem;
             }
+            
+            .main-content {
+                margin: -30px 15px 50px;
+                padding: 30px 20px;
+            }
         }
         
         @media (max-width: 768px) {
             .page-header {
-                padding: 60px 0;
+                padding: 80px 0;
             }
             
             .page-title {
@@ -506,6 +584,11 @@
             
             .class-card {
                 margin-bottom: 30px;
+            }
+            
+            .main-content {
+                margin: -20px 10px 40px;
+                padding: 20px 15px;
             }
         }
         
@@ -532,7 +615,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation - Unchanged -->
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.html">
@@ -569,9 +652,9 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i> Account
+                            <i class="bi bi-person-circle"></i> <span id="nav-username">Account</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <ul class="dropdown-menu" id="navbar-dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="login.html">Login</a></li>
                             <li><a class="dropdown-item" href="register.html">Register</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -583,10 +666,17 @@
         </div>
     </nav>
     
-   
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title">Fitness Classes</h1>
+            <p>Discover our wide range of fitness classes designed to empower and strengthen women of all fitness levels.</p>
+        </div>
+    </div>
+    
     <!-- Main Content -->
-    <main class="container mb-5" id="classes-container">
-        <!-- Filters Section - Enhanced -->
+    <main class="container main-content" id="classes-container">
+        <!-- Filters Section -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card filter-card">
@@ -608,10 +698,10 @@
                                     </label>
                                     <select class="form-select" id="duration-filter">
                                         <option value="">Any Duration</option>
-                                        <option value="0.5">30 minutes</option>
-                                        <option value="1">1 hour</option>
-                                        <option value="1.5">1.5 hours</option>
-                                        <option value="2">2 hours</option>
+                                        <option value="30">30 minutes</option>
+                                        <option value="60">60 minutes</option>
+                                        <option value="90">90 minutes</option>
+                                        <option value="120">120 minutes</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
@@ -636,7 +726,7 @@
             </div>
         </div>
         
-        <!-- Classes Grid - Enhanced -->
+        <!-- Classes Grid -->
         <div class="row g-4" id="classes-grid">
             <div class="col-12 text-center">
                 <div class="spinner-container">
@@ -648,7 +738,7 @@
             </div>
         </div>
         
-        <!-- Pagination - Enhanced -->
+        <!-- Pagination -->
         <nav aria-label="Classes pagination" class="mt-4">
             <ul class="pagination justify-content-center" id="pagination">
                 <!-- Pagination will be added dynamically -->
@@ -656,7 +746,7 @@
         </nav>
     </main>
     
-    <!-- Footer - Unchanged -->
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="row">
@@ -698,6 +788,46 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="assets/js/main.js"></script>
+    
+    <!-- User Authentication Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in and update navbar
+            if (typeof authService !== 'undefined' && authService.isLoggedIn()) {
+                const user = authService.getCurrentUser();
+                
+                // Update the dropdown toggle text to show the user's name
+                const dropdownToggle = document.getElementById('navbarDropdown');
+                if (dropdownToggle) {
+                    dropdownToggle.innerHTML = `<i class="bi bi-person-circle"></i> <span>${user.name}</span>`;
+                }
+
+                // Update the dropdown menu items
+                const dropdownMenu = document.getElementById('navbar-dropdown-menu');
+                if (dropdownMenu) {
+                    dropdownMenu.innerHTML = `
+                        <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                        <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+                        <li><a class="dropdown-item" href="bookings.html">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="membership.html">My Membership</a></li>
+                        <li><a class="dropdown-item" href="orders.html">Order History</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+                    `;
+
+                    // Add event listener to the logout button
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            authService.logout();
+                        });
+                    }
+                }
+            }
+        });
+    </script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
             // Global variables
@@ -713,6 +843,16 @@
             const durationFilter = document.getElementById('duration-filter');
             const sortFilter = document.getElementById('sort-filter');
             const resetFiltersBtn = document.getElementById('reset-filters');
+            
+            // Format duration function
+            function formatDuration(minutes) {
+                const num = parseFloat(minutes);
+                if (num % 1 === 0) {
+                    return `${Math.floor(num)} min`;
+                } else {
+                    return `${num} min`;
+                }
+            }
             
             // Load classes
             async function loadClasses() {
@@ -772,7 +912,7 @@
                                     <h5 class="card-title class-title">${classItem.name}</h5>
                                     <p class="card-text class-description">${classItem.description}</p>
                                     <div class="class-info">
-                                        <span><i class="bi bi-clock"></i> ${classItem.duration}h</span>
+                                        <span><i class="bi bi-clock"></i> ${formatDuration(classItem.duration)}</span>
                                         <span><i class="bi bi-person"></i> ${classItem.trainerName}</span>
                                     </div>
                                     <div class="class-info">
@@ -858,8 +998,13 @@
                     }
                     
                     // Duration filter
-                    if (durationValue && parseFloat(classItem.duration) !== parseFloat(durationValue)) {
-                        return false;
+                    if (durationValue) {
+                        const classDuration = parseFloat(classItem.duration);
+                        const selectedDuration = parseFloat(durationValue);
+                        
+                        if (Math.abs(classDuration - selectedDuration) > 0.01) {
+                            return false;
+                        }
                     }
                     
                     return true;

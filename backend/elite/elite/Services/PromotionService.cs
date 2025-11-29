@@ -154,26 +154,40 @@ namespace elite.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> ValidatePromotionAsync(string code, decimal orderAmount)
+        public async Task<bool> ValidatePromotionAsync(string code, decimal orderAmount, int userId)
         {
             var promotion = await _context.Promotions
                 .FirstOrDefaultAsync(p => p.Code == code);
 
-            if (promotion == null) return false;
-            if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate) return false;
-            if (promotion.UsageLimit > 0 && promotion.TimesUsed >= promotion.UsageLimit) return false;
+            if (promotion == null)
+                return false;
+
+            if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate)
+                return false;
+
+            if (promotion.UsageLimit > 0 && promotion.TimesUsed >= promotion.UsageLimit)
+                return false;
+
+            // Check if user has already used this promotion
+            var hasUserUsedPromotion = await _context.PromotionUsages
+                .AnyAsync(pu => pu.PromotionId == promotion.Id && pu.UserId == userId);
+
+            if (hasUserUsedPromotion)
+                return false;
 
             return true;
         }
 
-        public async Task<decimal> CalculateDiscountAsync(string code, decimal orderAmount)
+        public async Task<decimal> CalculateDiscountAsync(string code, decimal orderAmount, int userId)
         {
             var promotion = await _context.Promotions
                 .FirstOrDefaultAsync(p => p.Code == code);
 
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-            if (!await ValidatePromotionAsync(code, orderAmount))
-                throw new InvalidOperationException("Promotion is not valid");
+            if (promotion == null)
+                throw new ArgumentException("Promotion not found");
+
+            if (!await ValidatePromotionAsync(code, orderAmount, userId))
+                throw new InvalidOperationException("Promotion is not valid or has already been used by this user");
 
             decimal discount = 0;
             if (promotion.DiscountType == "Percentage")
@@ -185,12 +199,38 @@ namespace elite.Services
                 discount = promotion.DiscountValue;
             }
 
+            // Cap discount to not exceed order amount
+            if (discount > orderAmount)
+                discount = orderAmount;
+
+            // Record promotion usage
+            var promotionUsage = new PromotionUsage
+            {
+                PromotionId = promotion.Id,
+                UserId = userId,
+                UsedAt = DateTime.UtcNow,
+                OrderAmount = orderAmount,
+                DiscountApplied = discount
+            };
+
+            _context.PromotionUsages.Add(promotionUsage);
+
             // Update usage count
             promotion.TimesUsed++;
             _context.Promotions.Update(promotion);
+
             await _context.SaveChangesAsync();
 
             return discount;
         }
+
+        // Update other methods to include userId parameter where needed
+        public async Task<bool> HasUserUsedPromotionAsync(int promotionId, int userId)
+        {
+            return await _context.PromotionUsages
+                .AnyAsync(pu => pu.PromotionId == promotionId && pu.UserId == userId);
+        }
+
+
     }
 }

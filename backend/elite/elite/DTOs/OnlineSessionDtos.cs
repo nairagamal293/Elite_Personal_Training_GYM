@@ -7,12 +7,13 @@ namespace elite.DTOs
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public decimal Duration { get; set; }
+        public decimal Duration { get; set; } // Now in minutes
         public int TrainerId { get; set; }
         public string TrainerName { get; set; }
         public decimal Price { get; set; }
     }
 
+    // DTOs/OnlineSessionCreateDto.cs
     public class OnlineSessionCreateDto
     {
         [Required, MaxLength(100)]
@@ -21,8 +22,8 @@ namespace elite.DTOs
         [Required]
         public string Description { get; set; }
 
-        [Required, Range(0.5, 5)]
-        public decimal Duration { get; set; }
+        [Required, Range(15, 300)] // Updated range for minutes (15 min to 5 hours)
+        public decimal Duration { get; set; } // Now in minutes
 
         [Required]
         public int TrainerId { get; set; }

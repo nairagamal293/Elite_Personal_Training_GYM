@@ -21,7 +21,12 @@ namespace elite.Controllers
             _logger = logger;
         }
 
+       
+
+
+        // Add this method to OrdersController.cs
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
         {
             try
@@ -156,12 +161,35 @@ namespace elite.Controllers
             }
         }
 
+        // In Controllers/OrdersController.cs - Add this method
+        [HttpGet("user")]
+        [Authorize]
+        public async Task<IActionResult> GetUserOrders()
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var orders = await _orderService.GetUserOrdersAsync(userId);
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user orders");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+
+        // Controllers/OrdersController.cs
         [HttpPost("apply-promotion")]
+        [Authorize]
         public async Task<IActionResult> ApplyPromotion([FromBody] ApplyPromotionDto applyPromotionDto)
         {
             try
             {
-                var discount = await _orderService.ApplyPromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount);
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var discount = await _orderService.ApplyPromotionAsync(
+                    applyPromotionDto.Code, applyPromotionDto.OrderAmount, userId);
                 return Ok(new { discount, finalAmount = applyPromotionDto.OrderAmount - discount });
             }
             catch (ArgumentException ex)

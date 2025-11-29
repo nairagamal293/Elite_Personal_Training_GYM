@@ -55,34 +55,54 @@ namespace elite.Services
             };
         }
 
+        // Services/OnlineSessionService.cs
         public async Task<OnlineSessionDto> CreateSessionAsync(OnlineSessionCreateDto sessionCreateDto)
         {
-            // Check if trainer exists
-            var trainer = await _context.Trainers.FindAsync(sessionCreateDto.TrainerId);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            var session = new OnlineSession
+            try
             {
-                Name = sessionCreateDto.Name,
-                Description = sessionCreateDto.Description,
-                Duration = sessionCreateDto.Duration,
-                TrainerId = sessionCreateDto.TrainerId,
-                Price = sessionCreateDto.Price
-            };
+                // Validate trainer exists
+                var trainer = await _context.Trainers.FindAsync(sessionCreateDto.TrainerId);
+                if (trainer == null)
+                    throw new ArgumentException("Trainer not found");
 
-            _context.OnlineSessions.Add(session);
-            await _context.SaveChangesAsync();
+                // Validate duration is in reasonable range (15 min to 5 hours)
+                if (sessionCreateDto.Duration < 15 || sessionCreateDto.Duration > 300)
+                    throw new ArgumentException("Duration must be between 15 and 300 minutes");
 
-            return new OnlineSessionDto
+                // Check for duplicate session name
+                if (await _context.OnlineSessions.AnyAsync(os => os.Name == sessionCreateDto.Name))
+                    throw new ArgumentException("An online session with this name already exists");
+
+                // Create the online session entity
+                var session = new OnlineSession
+                {
+                    Name = sessionCreateDto.Name,
+                    Description = sessionCreateDto.Description,
+                    Duration = sessionCreateDto.Duration, // Duration in minutes
+                    TrainerId = sessionCreateDto.TrainerId,
+                    Price = sessionCreateDto.Price
+                };
+
+                _context.OnlineSessions.Add(session);
+                await _context.SaveChangesAsync();
+
+                // Return the created session details
+                return new OnlineSessionDto
+                {
+                    Id = session.Id,
+                    Name = session.Name,
+                    Description = session.Description,
+                    Duration = session.Duration,
+                    TrainerId = session.TrainerId,
+                    TrainerName = trainer.Name,
+                    Price = session.Price
+                };
+            }
+            catch (Exception ex)
             {
-                Id = session.Id,
-                Name = session.Name,
-                Description = session.Description,
-                Duration = session.Duration,
-                TrainerId = session.TrainerId,
-                TrainerName = trainer.Name,
-                Price = session.Price
-            };
+                _logger.LogError(ex, "Error creating online session: {SessionName}", sessionCreateDto.Name);
+                throw;
+            }
         }
 
         public async Task<OnlineSessionDto> UpdateSessionAsync(int id, OnlineSessionCreateDto sessionUpdateDto)

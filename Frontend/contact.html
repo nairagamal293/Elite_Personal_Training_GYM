@@ -9,18 +9,22 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         /* Global Styles */
         :root {
-            --primary-color: #800020;      /* Burgundy */
-            --secondary-color: #a52a2a;     /* Lighter Burgundy */
-            --accent-color: #e6b8af;        /* Light Burgundy Accent */
-            --dark-color: #212529;
-            --light-color: #f8f9fa;
-            --text-dark: #333;
-            --text-light: #666;
+            --primary-color: #5E60CE;      /* Modern Indigo */
+            --secondary-color: #5390D9;    /* Lighter Blue */
+            --accent-color: #48BFE3;       /* Teal Accent */
+            --dark-color: #0B132B;         /* Deep Dark Blue */
+            --light-color: #F8F9FA;
+            --text-dark: #0B132B;
+            --text-light: #5E6472;
+            --card-bg: #ffffff;
+            --section-bg: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #5E60CE 0%, #5390D9 100%);
+            --gradient-2: linear-gradient(135deg, #48BFE3 0%, #5E60CE 100%);
         }
         
         * {
@@ -32,22 +36,24 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
-            background-color: #fff;
+            background-color: var(--section-bg);
             overflow-x: hidden;
         }
         
         /* Navbar Styles */
         .navbar {
             background-color: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
             padding: 15px 0;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand {
             font-weight: 700;
             font-size: 1.8rem;
             color: var(--primary-color) !important;
+            font-family: 'Playfair Display', serif;
         }
         
         .navbar-nav .nav-link {
@@ -70,6 +76,7 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+            background: var(--gradient-1);
             transition: all 0.3s ease;
         }
         
@@ -77,11 +84,12 @@
             width: 70%;
         }
         
+       
         
         /* Contact Section */
         .contact-section {
-            margin-top: 30px;
             padding: 80px 0;
+            background-color: white;
         }
         
         .section-title {
@@ -91,6 +99,7 @@
             color: var(--text-dark);
             position: relative;
             display: inline-block;
+            font-family: 'Playfair Display', serif;
         }
         
         .section-title:after {
@@ -98,7 +107,7 @@
             position: absolute;
             width: 70px;
             height: 4px;
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             bottom: -10px;
             left: 0;
         }
@@ -114,23 +123,42 @@
         /* Contact Info Cards */
         .info-card {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             height: 100%;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(94, 96, 206, 0.1);
+        }
+        
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .info-card:hover::before {
+            transform: scaleX(1);
         }
         
         .info-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+            box-shadow: 0 20px 40px rgba(72, 191, 227, 0.15);
         }
         
         .info-icon {
             width: 80px;
             height: 80px;
-            background-color: var(--accent-color);
+            background: var(--gradient-1);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -140,17 +168,13 @@
         }
         
         .info-card:hover .info-icon {
-            background-color: var(--primary-color);
+            background: var(--gradient-2);
         }
         
         .info-icon i {
             font-size: 2rem;
-            color: var(--primary-color);
+            color: white;
             transition: all 0.3s ease;
-        }
-        
-        .info-card:hover .info-icon i {
-            color: #fff;
         }
         
         .info-title {
@@ -168,14 +192,15 @@
         /* Contact Form */
         .contact-form {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(94, 96, 206, 0.1);
         }
         
         .form-control, .form-select, .textarea {
-            border-radius: 8px;
-            border: 1px solid #ddd;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
             padding: 12px 15px;
             transition: all 0.3s ease;
             font-family: 'Montserrat', sans-serif;
@@ -183,17 +208,17 @@
         
         .form-control:focus, .form-select:focus, .textarea:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(94, 96, 206, 0.25);
         }
         
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 8px;
         }
         
         .btn-submit {
-            background-color: var(--primary-color);
+            background: var(--gradient-2);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -202,25 +227,27 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
         }
         
         .btn-submit:hover {
-            background-color: var(--secondary-color);
-            color: white;
             transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
+            color: white;
         }
         
         /* Map Section */
         .map-section {
             padding: 80px 0;
-            background-color: #f8f0f3;
+            background-color: var(--section-bg);
         }
         
         .map-container {
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             height: 450px;
+            border: 1px solid rgba(94, 96, 206, 0.1);
         }
         
         .map-container iframe {
@@ -232,17 +259,19 @@
         /* FAQ Section */
         .faq-section {
             padding: 80px 0;
+            background-color: white;
         }
         
         .accordion {
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(94, 96, 206, 0.1);
         }
         
         .accordion-item {
             border: none;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid rgba(94, 96, 206, 0.1);
         }
         
         .accordion-item:last-child {
@@ -252,14 +281,14 @@
         .accordion-button {
             background-color: white;
             color: var(--text-dark);
-            font-weight: 500;
+            font-weight: 600;
             box-shadow: none;
             padding: 20px;
         }
         
         .accordion-button:not(.collapsed) {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
+            background: var(--gradient-1);
+            color: white;
         }
         
         .accordion-button:focus {
@@ -268,18 +297,32 @@
         }
         
         .accordion-button::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23800020'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235E60CE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         
         .accordion-button:not(.collapsed)::after {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23800020'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         }
         
         /* Footer */
         footer {
-            background-color: var(--dark-color);
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 100%);
             color: white;
             padding: 70px 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
         }
         
         .footer-title {
@@ -287,11 +330,15 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-text {
             margin-bottom: 20px;
-            color: #ccc;
+            color: #cccccc;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a {
@@ -305,16 +352,21 @@
             margin-right: 10px;
             color: white;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a:hover {
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.4);
         }
         
         .footer-links {
             list-style: none;
             padding: 0;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-links li {
@@ -322,19 +374,21 @@
         }
         
         .footer-links a {
-            color: #ccc;
+            color: #cccccc;
             text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-block;
         }
         
         .footer-links a:hover {
-            color: var(--primary-color);
+            color: white;
             padding-left: 5px;
         }
         
         .contact-info i {
-            color: var(--primary-color);
+            color: var(--accent-color);
             margin-right: 10px;
+            font-size: 1.1rem;
         }
         
         .copyright {
@@ -342,32 +396,140 @@
             padding-top: 30px;
             margin-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc;
+            color: #999999;
+            position: relative;
+            z-index: 1;
         }
         
         /* Success Message */
         .success-message {
             display: none;
-            background-color: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
+            border-left: 4px solid #198754;
+        }
+        
+        /* Business Hours Card */
+        .business-hours-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(94, 96, 206, 0.1);
+            height: 100%;
+        }
+        
+        .business-hours-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            position: relative;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .business-hours-card h3:after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: var(--gradient-1);
+            bottom: -8px;
+            left: 0;
+        }
+        
+        .hours-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(94, 96, 206, 0.1);
+        }
+        
+        .hours-item:last-child {
+            border-bottom: none;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background-color: var(--light-color);
+            border-radius: 50%;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: var(--gradient-1);
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .assistance-card {
+            background: var(--gradient-1);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+        
+        .assistance-card h5 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .assistance-card p {
+            margin-bottom: 0;
+            opacity: 0.9;
         }
         
         /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .page-header {
+                padding: 80px 0;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .contact-section, .map-section, .faq-section {
+                padding: 60px 0;
+            }
+        }
+        
         @media (max-width: 768px) {
             .page-header {
-                padding: 40px 0;
+                padding: 60px 0;
             }
             
             .page-title {
                 font-size: 2rem;
             }
             
-            .contact-section, .map-section, .faq-section {
-                padding: 60px 0;
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .contact-form {
+                padding: 25px;
+            }
+            
+            .business-hours-card {
+                margin-top: 30px;
             }
         }
         
@@ -377,11 +539,11 @@
             }
             
             .section-title {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
             }
             
             .contact-form {
-                padding: 25px;
+                padding: 20px;
             }
         }
     </style>
@@ -426,7 +588,7 @@
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle"></i> Account
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <ul class="dropdown-menu" id="navbar-dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="login.html">Login</a></li>
                             <li><a class="dropdown-item" href="register.html">Register</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -438,7 +600,7 @@
         </div>
     </nav>
     
-
+ 
     
     <!-- Contact Section -->
     <section class="contact-section">
@@ -535,32 +697,32 @@
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <div class="contact-form">
-                        <h3 class="mb-4">Business Hours</h3>
-                        <div class="d-flex justify-content-between mb-2">
+                    <div class="business-hours-card">
+                        <h3>Business Hours</h3>
+                        <div class="hours-item">
                             <span>Monday - Friday</span>
                             <span>6:00 AM - 9:00 PM</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="hours-item">
                             <span>Saturday</span>
                             <span>7:00 AM - 8:00 PM</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-4">
+                        <div class="hours-item">
                             <span>Sunday</span>
                             <span>7:00 AM - 8:00 PM</span>
                         </div>
                         
-                        <h3 class="mb-4">Follow Us</h3>
-                        <div class="d-flex gap-3">
-                            <a href="#" class="text-dark fs-4"><i class="bi bi-facebook"></i></a>
-                            <a href="#" class="text-dark fs-4"><i class="bi bi-instagram"></i></a>
-                            <a href="#" class="text-dark fs-4"><i class="bi bi-twitter"></i></a>
-                            <a href="#" class="text-dark fs-4"><i class="bi bi-youtube"></i></a>
+                        <h3 style="margin-top: 30px;">Follow Us</h3>
+                        <div class="social-links">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-instagram"></i></a>
+                            <a href="#"><i class="bi bi-twitter"></i></a>
+                            <a href="#"><i class="bi bi-youtube"></i></a>
                         </div>
                         
-                        <div class="mt-4 p-3" style="background-color: #f8f0f3; border-radius: 8px;">
-                            <h5 class="mb-2">Need Immediate Assistance?</h5>
-                            <p class="mb-0">Call our front desk at <strong>(123) 456-7890</strong> during business hours for immediate assistance.</p>
+                        <div class="assistance-card">
+                            <h5>Need Immediate Assistance?</h5>
+                            <p>Call our front desk at <strong>(123) 456-7890</strong> during business hours for immediate assistance.</p>
                         </div>
                     </div>
                 </div>
@@ -699,6 +861,48 @@
     
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="assets/js/main.js"></script>
+    
+    <!-- User Authentication Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in and update navbar
+            if (typeof authService !== 'undefined' && authService.isLoggedIn()) {
+                const user = authService.getCurrentUser();
+                
+                // Update the dropdown toggle text to show the user's name
+                const dropdownToggle = document.getElementById('navbarDropdown');
+                if (dropdownToggle) {
+                    dropdownToggle.innerHTML = `<i class="bi bi-person-circle"></i> <span>${user.name}</span>`;
+                }
+
+                // Update the dropdown menu items
+                const dropdownMenu = document.getElementById('navbar-dropdown-menu');
+                if (dropdownMenu) {
+                    dropdownMenu.innerHTML = `
+                        <li><a class="dropdown-item" href="dashboard.html">My Dashboard</a></li>
+                        <li><a class="dropdown-item" href="profile.html">My Profile</a></li>
+                        <li><a class="dropdown-item" href="bookings.html">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="membership.html">My Membership</a></li>
+                        <li><a class="dropdown-item" href="orders.html">Order History</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="logout-btn">Logout</a></li>
+                    `;
+
+                    // Add event listener to the logout button
+                    const logoutBtn = document.getElementById('logout-btn');
+                    if (logoutBtn) {
+                        logoutBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            authService.logout();
+                        });
+                    }
+                }
+            }
+        });
+    </script>
     
     <!-- Custom JavaScript -->
     <script>

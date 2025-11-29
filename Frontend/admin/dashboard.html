@@ -1385,10 +1385,10 @@
                             <textarea class="form-control" id="class-description" rows="3" required></textarea>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="class-duration" class="form-label">Duration (minutes)</label>
-                                <input type="number" class="form-control" id="class-duration" min="15" step="15" required>
-                            </div>
+                           <div class="col-md-4 mb-3">
+    <label for="class-duration" class="form-label">Duration (minutes)</label>
+    <input type="number" class="form-control" id="class-duration" min="15" step="15" required>
+</div>
                             <div class="col-md-4 mb-3">
                                 <label for="class-capacity" class="form-label">Max Capacity</label>
                                 <input type="number" class="form-control" id="class-capacity" min="1" required>
@@ -1436,10 +1436,10 @@
                             <textarea class="form-control" id="session-description" rows="3" required></textarea>
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="session-duration" class="form-label">Duration (minutes)</label>
-                                <input type="number" class="form-control" id="session-duration" min="15" step="15" required>
-                            </div>
+                           <div class="col-md-6 mb-3">
+    <label for="session-duration" class="form-label">Duration (minutes)</label>
+    <input type="number" class="form-control" id="session-duration" min="15" step="15" required>
+</div>
                             <div class="col-md-6 mb-3">
                                 <label for="session-price" class="form-label">Price</label>
                                 <input type="number" class="form-control" id="session-price" min="0" step="0.01" required>
@@ -2943,30 +2943,30 @@
                     const row = document.createElement('tr');
                     
                     row.innerHTML = `
-                        <td>${classObj.id}</td>
-                        <td>${classObj.name}</td>
-                        <td>${classObj.description}</td>
-                        <td>${classObj.trainerName}</td>
-                        <td>${classObj.duration} min</td>
-                        <td>${classObj.maxCapacity}</td>
-                        <td>${uiHelper.formatCurrency(classObj.price)}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary view-class-btn" data-id="${classObj.id}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary edit-class-btn" data-id="${classObj.id}">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger delete-class-btn" data-id="${classObj.id}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info view-schedules-btn" data-id="${classObj.id}">
-                                    <i class="bi bi-calendar3"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
+    <td>${classObj.id}</td>
+    <td>${classObj.name}</td>
+    <td>${classObj.description}</td>
+    <td>${classObj.trainerName}</td>
+    <td>${classObj.duration} min</td>
+    <td>${classObj.maxCapacity}</td>
+    <td>${uiHelper.formatCurrency(classObj.price)}</td>
+    <td>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary view-class-btn" data-id="${classObj.id}">
+                <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary edit-class-btn" data-id="${classObj.id}">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-class-btn" data-id="${classObj.id}">
+                <i class="bi bi-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-info view-schedules-btn" data-id="${classObj.id}">
+                <i class="bi bi-calendar3"></i>
+            </button>
+        </div>
+    </td>
+`;
                     
                     tableBody.appendChild(row);
                 });
@@ -3015,43 +3015,43 @@
                 
                 // Create a modal to show class details
                 const modalHtml = `
-                    <div class="modal fade" id="classDetailsModal" tabindex="-1" aria-labelledby="classDetailsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="classDetailsModalLabel">Class Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <strong>ID:</strong> ${classObj.id}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Name:</strong> ${classObj.name}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Description:</strong> ${classObj.description}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Trainer:</strong> ${classObj.trainerName}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Duration:</strong> ${classObj.duration} minutes
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Max Capacity:</strong> ${classObj.maxCapacity}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Price:</strong> ${uiHelper.formatCurrency(classObj.price)}
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="classDetailsModal" tabindex="-1" aria-labelledby="classDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="classDetailsModalLabel">Class Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>ID:</strong> ${classObj.id}
                     </div>
-                `;
+                    <div class="mb-3">
+                        <strong>Name:</strong> ${classObj.name}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong> ${classObj.description}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Trainer:</strong> ${classObj.trainerName}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Duration:</strong> ${classObj.duration} minutes
+                    </div>
+                    <div class="mb-3">
+                        <strong>Max Capacity:</strong> ${classObj.maxCapacity}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Price:</strong> ${uiHelper.formatCurrency(classObj.price)}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');
@@ -3079,60 +3079,60 @@
                 
                 // Create a modal to show class schedules
                 const modalHtml = `
-                    <div class="modal fade" id="classSchedulesModal" tabindex="-1" aria-labelledby="classSchedulesModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header d-flex justify-content-between align-items-center">
-                                    <h5 class="modal-title" id="classSchedulesModalLabel">Schedules for ${classObj.name}</h5>
-                                    <button type="button" class="btn btn-primary btn-sm" id="create-class-schedule-btn" data-class-id="${classId}">
-                                        <i class="bi bi-plus-circle"></i> Create Schedule
-                                    </button>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Start Time</th>
-                                                    <th>End Time</th>
-                                                    <th>Location</th>
-                                                    <th>Available Slots</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${schedules.length === 0 ? 
-                                                    '<tr><td colspan="6" class="text-center">No schedules found</td></tr>' :
-                                                    schedules.map(schedule => `
-                                                        <tr>
-                                                            <td>${schedule.id}</td>
-                                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
-                                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
-                                                            <td>${schedule.location}</td>
-                                                            <td>${schedule.availableSlots} / ${schedule.maxCapacity}</td>
-                                                            <td>
-                                                                <div class="btn-group">
-                                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="class">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="classSchedulesModal" tabindex="-1" aria-labelledby="classSchedulesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title" id="classSchedulesModalLabel">Schedules for ${classObj.name}</h5>
+                    <button type="button" class="btn btn-primary btn-sm" id="create-class-schedule-btn" data-class-id="${classId}">
+                        <i class="bi bi-plus-circle"></i> Create Schedule
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Location</th>
+                                    <th>Available Slots</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${schedules.length === 0 ? 
+                                    '<tr><td colspan="6" class="text-center">No schedules found</td></tr>' :
+                                    schedules.map(schedule => `
+                                        <tr>
+                                            <td>${schedule.id}</td>
+                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
+                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
+                                            <td>${schedule.location}</td>
+                                            <td>${schedule.availableSlots} / ${schedule.maxCapacity}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="class">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                `;
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');
@@ -3309,29 +3309,29 @@
                     const row = document.createElement('tr');
                     
                     row.innerHTML = `
-                        <td>${session.id}</td>
-                        <td>${session.name}</td>
-                        <td>${session.description}</td>
-                        <td>${session.trainerName}</td>
-                        <td>${session.duration} min</td>
-                        <td>${uiHelper.formatCurrency(session.price)}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-outline-primary view-session-btn" data-id="${session.id}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary edit-session-btn" data-id="${session.id}">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger delete-session-btn" data-id="${session.id}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-info view-session-schedules-btn" data-id="${session.id}">
-                                    <i class="bi bi-calendar3"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
+    <td>${session.id}</td>
+    <td>${session.name}</td>
+    <td>${session.description}</td>
+    <td>${session.trainerName}</td>
+    <td>${session.duration} min</td>
+    <td>${uiHelper.formatCurrency(session.price)}</td>
+    <td>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary view-session-btn" data-id="${session.id}">
+                <i class="bi bi-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary edit-session-btn" data-id="${session.id}">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-session-btn" data-id="${session.id}">
+                <i class="bi bi-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-info view-session-schedules-btn" data-id="${session.id}">
+                <i class="bi bi-calendar3"></i>
+            </button>
+        </div>
+    </td>
+`;
                     
                     tableBody.appendChild(row);
                 });
@@ -3380,40 +3380,40 @@
                 
                 // Create a modal to show session details
                 const modalHtml = `
-                    <div class="modal fade" id="sessionDetailsModal" tabindex="-1" aria-labelledby="sessionDetailsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="sessionDetailsModalLabel">Online Session Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <strong>ID:</strong> ${session.id}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Name:</strong> ${session.name}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Description:</strong> ${session.description}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Trainer:</strong> ${session.trainerName}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Duration:</strong> ${session.duration} minutes
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong>Price:</strong> ${uiHelper.formatCurrency(session.price)}
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="sessionDetailsModal" tabindex="-1" aria-labelledby="sessionDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sessionDetailsModalLabel">Online Session Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>ID:</strong> ${session.id}
                     </div>
-                `;
+                    <div class="mb-3">
+                        <strong>Name:</strong> ${session.name}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong> ${session.description}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Trainer:</strong> ${session.trainerName}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Duration:</strong> ${session.duration} minutes
+                    </div>
+                    <div class="mb-3">
+                        <strong>Price:</strong> ${uiHelper.formatCurrency(session.price)}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');
@@ -3441,58 +3441,58 @@
                 
                 // Create a modal to show session schedules
                 const modalHtml = `
-                    <div class="modal fade" id="sessionSchedulesModal" tabindex="-1" aria-labelledby="sessionSchedulesModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header d-flex justify-content-between align-items-center">
-                                    <h5 class="modal-title" id="sessionSchedulesModalLabel">Schedules for ${session.name}</h5>
-                                    <button type="button" class="btn btn-primary btn-sm" id="create-session-schedule-btn" data-session-id="${sessionId}">
-                                        <i class="bi bi-plus-circle"></i> Create Schedule
-                                    </button>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Start Time</th>
-                                                    <th>End Time</th>
-                                                    <th>Available Slots</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${schedules.length === 0 ? 
-                                                    '<tr><td colspan="5" class="text-center">No schedules found</td></tr>' :
-                                                    schedules.map(schedule => `
-                                                        <tr>
-                                                            <td>${schedule.id}</td>
-                                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
-                                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
-                                                            <td>${schedule.availableSlots} / ${schedule.maxSlots}</td>
-                                                            <td>
-                                                                <div class="btn-group">
-                                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="session">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="sessionSchedulesModal" tabindex="-1" aria-labelledby="sessionSchedulesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title" id="sessionSchedulesModalLabel">Schedules for ${session.name}</h5>
+                    <button type="button" class="btn btn-primary btn-sm" id="create-session-schedule-btn" data-session-id="${sessionId}">
+                        <i class="bi bi-plus-circle"></i> Create Schedule
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Available Slots</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${schedules.length === 0 ? 
+                                    '<tr><td colspan="5" class="text-center">No schedules found</td></tr>' :
+                                    schedules.map(schedule => `
+                                        <tr>
+                                            <td>${schedule.id}</td>
+                                            <td>${uiHelper.formatDate(schedule.startTime)}</td>
+                                            <td>${uiHelper.formatDate(schedule.endTime)}</td>
+                                            <td>${schedule.availableSlots} / ${schedule.maxSlots}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-sm btn-outline-danger delete-schedule-btn" data-id="${schedule.id}" data-type="session">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                `;
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');
@@ -4009,51 +4009,51 @@
                 
                 // Create a modal to show trainer classes
                 const modalHtml = `
-                    <div class="modal fade" id="trainerClassesModal" tabindex="-1" aria-labelledby="trainerClassesModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="trainerClassesModalLabel">Classes by ${trainer.name}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Name</th>
-                                                    <th>Description</th>
-                                                    <th>Duration</th>
-                                                    <th>Capacity</th>
-                                                    <th>Price</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${classes.length === 0 ? 
-                                                    '<tr><td colspan="6" class="text-center">No classes found</td></tr>' :
-                                                    classes.map(classObj => `
-                                                        <tr>
-                                                            <td>${classObj.id}</td>
-                                                            <td>${classObj.name}</td>
-                                                            <td>${classObj.description}</td>
-                                                            <td>${classObj.duration} min</td>
-                                                            <td>${classObj.maxCapacity}</td>
-                                                            <td>${uiHelper.formatCurrency(classObj.price)}</td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="trainerClassesModal" tabindex="-1" aria-labelledby="trainerClassesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trainerClassesModalLabel">Classes by ${trainer.name}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Duration (min)</th>
+                                    <th>Capacity</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${classes.length === 0 ? 
+                                    '<tr><td colspan="6" class="text-center">No classes found</td></tr>' :
+                                    classes.map(classObj => `
+                                        <tr>
+                                            <td>${classObj.id}</td>
+                                            <td>${classObj.name}</td>
+                                            <td>${classObj.description}</td>
+                                            <td>${classObj.duration} min</td>
+                                            <td>${classObj.maxCapacity}</td>
+                                            <td>${uiHelper.formatCurrency(classObj.price)}</td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                `;
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');
@@ -4082,49 +4082,49 @@
                 
                 // Create a modal to show trainer sessions
                 const modalHtml = `
-                    <div class="modal fade" id="trainerSessionsModal" tabindex="-1" aria-labelledby="trainerSessionsModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="trainerSessionsModalLabel">Online Sessions by ${trainer.name}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Name</th>
-                                                    <th>Description</th>
-                                                    <th>Duration</th>
-                                                    <th>Price</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${sessions.length === 0 ? 
-                                                    '<tr><td colspan="5" class="text-center">No sessions found</td></tr>' :
-                                                    sessions.map(session => `
-                                                        <tr>
-                                                            <td>${session.id}</td>
-                                                            <td>${session.name}</td>
-                                                            <td>${session.description}</td>
-                                                            <td>${session.duration} min</td>
-                                                            <td>${uiHelper.formatCurrency(session.price)}</td>
-                                                        </tr>
-                                                    `).join('')
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="modal fade" id="trainerSessionsModal" tabindex="-1" aria-labelledby="trainerSessionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="trainerSessionsModalLabel">Online Sessions by ${trainer.name}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Duration (min)</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sessions.length === 0 ? 
+                                    '<tr><td colspan="5" class="text-center">No sessions found</td></tr>' :
+                                    sessions.map(session => `
+                                        <tr>
+                                            <td>${session.id}</td>
+                                            <td>${session.name}</td>
+                                            <td>${session.description}</td>
+                                            <td>${session.duration} min</td>
+                                            <td>${uiHelper.formatCurrency(session.price)}</td>
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                `;
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                 
                 // Add modal to DOM
                 const modalContainer = document.createElement('div');

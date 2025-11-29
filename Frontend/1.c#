@@ -1,26 +1,3 @@
-using AutoMapper;
-using elite.DTOs;
-using elite.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace elite.Configurations
-{
-    public class AutoMapperProfile : Profile
-    {
-        public AutoMapperProfile()
-        {
-            
-            AllowNullCollections = true;
-            AllowNullDestinationValues = true;
-
-            CreateMap<User, UserResponseDto>();
-            CreateMap<Membership, MembershipDto>();
-            CreateMap<Booking, BookingResponseDto>();
-            CreateMap<Class, ClassDto>();
-            CreateMap<Trainer, TrainerDto>();
-        }
-    }
-}
 using elite.Data;
 using elite.Interfaces;
 using elite.Models;
@@ -160,10 +137,14 @@ namespace elite.Controllers
         }
     }
 }
+
+
 // Controllers/AuthController.cs
-using Microsoft.AspNetCore.Mvc;
 using elite.DTOs;
 using elite.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace elite.Controllers
 {
@@ -218,1335 +199,77 @@ namespace elite.Controllers
             }
         }
 
-
-
-    }
-}
-// Controllers/BookingsController.cs
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using elite.DTOs;
-using elite.Interfaces;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class BookingsController : ControllerBase
-    {
-        private readonly IBookingService _bookingService;
-        private readonly ILogger<BookingsController> _logger;
-
-        public BookingsController(IBookingService bookingService, ILogger<BookingsController> logger)
-        {
-            _bookingService = bookingService;
-            _logger = logger;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto bookingDto)
-        {
-            try
-            {
-                // Get user ID from token
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                bookingDto.UserId = userId;
-                var result = await _bookingService.CreateBookingAsync(bookingDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating booking");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> CancelBooking(int id)
+        // Add to AuthController.cs
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<ActionResult<UserResponseDto>> GetProfile()
         {
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var result = await _bookingService.CancelBookingAsync(id, userId);
-                if (result)
-                    return Ok(new { message = "Booking cancelled successfully" });
-                else
-                    return BadRequest(new { message = "Cannot cancel booking" });
+                var result = await _authService.GetUserProfileAsync(userId);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error cancelling booking");
+                _logger.LogError(ex, "Error getting user profile");
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetUserBookings()
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<ActionResult> UpdateProfile([FromBody] UserUpdateDto updateDto)
         {
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var result = await _bookingService.GetUserBookingsAsync(userId);
-                return Ok(result);
+                var result = await _authService.UpdateUserProfileAsync(userId, updateDto);
+                return Ok(new { message = "Profile updated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting user bookings");
+                _logger.LogError(ex, "Error updating user profile");
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
-        // Add this new endpoint
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetBookingById(int id)
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
             try
             {
                 var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var booking = await _bookingService.GetBookingDetailsAsync(id);
-
-                // Check if user owns this booking or is admin
-                var isAdmin = User.IsInRole("Admin");
-                if (!isAdmin && booking.UserId != userId)
-                    return Forbid();
-
-                return Ok(booking);
+                var result = await _authService.ChangePasswordAsync(userId, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
+                return Ok(new { message = "Password changed successfully" });
             }
             catch (ArgumentException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting booking by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ClassesController : ControllerBase
-    {
-        private readonly IClassService _classService;
-        private readonly ILogger<ClassesController> _logger;
-
-        public ClassesController(IClassService classService, ILogger<ClassesController> logger)
-        {
-            _classService = classService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllClasses()
-        {
-            try
-            {
-                var classes = await _classService.GetAllClassesAsync();
-                return Ok(classes);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all classes");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetClassById(int id)
-        {
-            try
-            {
-                var classObj = await _classService.GetClassByIdAsync(id);
-                return Ok(classObj);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting class by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateClass([FromBody] ClassCreateDto classCreateDto)
-        {
-            try
-            {
-                var result = await _classService.CreateClassAsync(classCreateDto);
-                return CreatedAtAction(nameof(GetClassById), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating class");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateClass(int id, [FromBody] ClassCreateDto classUpdateDto)
-        {
-            try
-            {
-                var result = await _classService.UpdateClassAsync(id, classUpdateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating class");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteClass(int id)
-        {
-            try
-            {
-                var result = await _classService.DeleteClassAsync(id);
-                return Ok(new { message = "Class deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting class");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}/schedules")]
-        public async Task<IActionResult> GetClassSchedules(int id)
-        {
-            try
-            {
-                var schedules = await _classService.GetClassSchedulesAsync(id);
-                return Ok(schedules);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting class schedules");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost("schedules")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateClassSchedule([FromBody] ClassScheduleCreateDto scheduleCreateDto)
-        {
-            try
-            {
-                var result = await _classService.CreateClassScheduleAsync(scheduleCreateDto);
-                return CreatedAtAction(nameof(GetClassSchedules), new { id = result.ClassId }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating class schedule");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("schedules/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteClassSchedule(int id)
-        {
-            try
-            {
-                var result = await _classService.DeleteClassScheduleAsync(id);
-                return Ok(new { message = "Class schedule deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting class schedule");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class MembershipsController : ControllerBase
-    {
-        private readonly IMembershipService _membershipService;
-        private readonly ILogger<MembershipsController> _logger;
-
-        public MembershipsController(IMembershipService membershipService, ILogger<MembershipsController> logger)
-        {
-            _membershipService = membershipService;
-            _logger = logger;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> PurchaseMembership([FromBody] PurchaseMembershipDto purchaseDto)
-        {
-            try
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                purchaseDto.UserId = userId;
-
-                var result = await _membershipService.PurchaseMembershipAsync(purchaseDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
+            catch (UnauthorizedAccessException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error purchasing membership");
+                _logger.LogError(ex, "Error changing password");
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetUserMembership()
-        {
-            try
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var result = await _membershipService.GetUserMembershipAsync(userId);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting user membership");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-
-    public class PurchaseMembershipRequest
-        {
-            public int UserId { get; set; }
-            public string Type { get; set; }
-        }
-    }
-
-// Controllers/MembershipTypesController.cs
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using elite.DTOs;
-using elite.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
-    public class MembershipTypesController : ControllerBase
-    {
-        private readonly IMembershipTypeService _membershipTypeService;
-        private readonly ILogger<MembershipTypesController> _logger;
-
-        public MembershipTypesController(IMembershipTypeService membershipTypeService, ILogger<MembershipTypesController> logger)
-        {
-            _membershipTypeService = membershipTypeService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        [AllowAnonymous] // Allow anyone to see membership types
-        public async Task<IActionResult> GetAllMembershipTypes()
-        {
-            try
-            {
-                var types = await _membershipTypeService.GetAllMembershipTypesAsync();
-                return Ok(types);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting membership types");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        // Add this new endpoint
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMembershipTypeById(int id)
-        {
-            try
-            {
-                var membershipType = await _membershipTypeService.GetMembershipTypeByIdAsync(id);
-                return Ok(membershipType);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting membership type by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateMembershipType([FromBody] MembershipTypeCreateDto createDto)
-        {
-            try
-            {
-                var result = await _membershipTypeService.CreateMembershipTypeAsync(createDto);
-                return CreatedAtAction(nameof(GetAllMembershipTypes), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating membership type");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMembershipType(int id, [FromBody] MembershipTypeCreateDto updateDto)
-        {
-            try
-            {
-                var result = await _membershipTypeService.UpdateMembershipTypeAsync(id, updateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating membership type");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPatch("{id}/toggle")]
-        public async Task<IActionResult> ToggleMembershipTypeStatus(int id, [FromBody] bool isActive)
-        {
-            try
-            {
-                var result = await _membershipTypeService.ToggleMembershipTypeStatusAsync(id, isActive);
-                return Ok(new { message = "Membership type status updated successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error toggling membership type status");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMembershipType(int id)
-        {
-            try
-            {
-                var result = await _membershipTypeService.DeleteMembershipTypeAsync(id);
-                return Ok(new { message = "Membership type deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting membership type");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
     }
 }
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OnlineSessionsController : ControllerBase
-    {
-        private readonly IOnlineSessionService _sessionService;
-        private readonly ILogger<OnlineSessionsController> _logger;
-
-        public OnlineSessionsController(IOnlineSessionService sessionService, ILogger<OnlineSessionsController> logger)
-        {
-            _sessionService = sessionService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllSessions()
-        {
-            try
-            {
-                var sessions = await _sessionService.GetAllSessionsAsync();
-                return Ok(sessions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all sessions");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetSessionById(int id)
-        {
-            try
-            {
-                var session = await _sessionService.GetSessionByIdAsync(id);
-                return Ok(session);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting session by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateSession([FromBody] OnlineSessionCreateDto sessionCreateDto)
-        {
-            try
-            {
-                var result = await _sessionService.CreateSessionAsync(sessionCreateDto);
-                return CreatedAtAction(nameof(GetSessionById), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating session");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateSession(int id, [FromBody] OnlineSessionCreateDto sessionUpdateDto)
-        {
-            try
-            {
-                var result = await _sessionService.UpdateSessionAsync(id, sessionUpdateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating session");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteSession(int id)
-        {
-            try
-            {
-                var result = await _sessionService.DeleteSessionAsync(id);
-                return Ok(new { message = "Session deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting session");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}/schedules")]
-        public async Task<IActionResult> GetSessionSchedules(int id)
-        {
-            try
-            {
-                var schedules = await _sessionService.GetSessionSchedulesAsync(id);
-                return Ok(schedules);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting session schedules");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost("schedules")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateSessionSchedule([FromBody] OnlineSessionScheduleCreateDto scheduleCreateDto)
-        {
-            try
-            {
-                var result = await _sessionService.CreateSessionScheduleAsync(scheduleCreateDto);
-                return CreatedAtAction(nameof(GetSessionSchedules), new { id = result.OnlineSessionId }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating session schedule");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("schedules/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteSessionSchedule(int id)
-        {
-            try
-            {
-                var result = await _sessionService.DeleteSessionScheduleAsync(id);
-                return Ok(new { message = "Session schedule deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting session schedule");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-namespace elite.Controllers
-{
-    // Controllers/OrdersController.cs
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize]
-    public class OrdersController : ControllerBase
-    {
-        private readonly IOrderService _orderService;
-        private readonly ILogger<OrdersController> _logger;
-
-        public OrdersController(IOrderService orderService, ILogger<OrdersController> logger)
-        {
-            _orderService = orderService;
-            _logger = logger;
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto orderCreateDto)
-        {
-            try
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                orderCreateDto.UserId = userId;
-
-                var result = await _orderService.CreateOrderAsync(orderCreateDto);
-                return CreatedAtAction(nameof(GetOrderById), new { id = result.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating order");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetOrderById(int id)
-        {
-            try
-            {
-                var order = await _orderService.GetOrderByIdAsync(id);
-
-                // Check if user owns this order or is admin
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var isAdmin = User.IsInRole("Admin");
-
-                if (!isAdmin && order.UserId != userId)
-                    return Forbid();
-
-                return Ok(order);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting order by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("user/{userId}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetUserOrders(int userId)
-        {
-            try
-            {
-                var orders = await _orderService.GetUserOrdersAsync(userId);
-                return Ok(orders);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting user orders");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllOrders()
-        {
-            try
-            {
-                var orders = await _orderService.GetAllOrdersAsync();
-                return Ok(orders);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all orders");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPatch("{id}/status")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] string status)
-        {
-            try
-            {
-                var result = await _orderService.UpdateOrderStatusAsync(id, status);
-                return Ok(new { message = "Order status updated successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating order status");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> CancelOrder(int id)
-        {
-            try
-            {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                var isAdmin = User.IsInRole("Admin");
-
-                // For non-admin users, check if they own the order
-                if (!isAdmin)
-                {
-                    var order = await _orderService.GetOrderByIdAsync(id);
-                    if (order.UserId != userId)
-                        return Forbid();
-                }
-
-                var result = await _orderService.CancelOrderAsync(id);
-                return Ok(new { message = "Order cancelled successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error cancelling order");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost("apply-promotion")]
-        public async Task<IActionResult> ApplyPromotion([FromBody] ApplyPromotionDto applyPromotionDto)
-        {
-            try
-            {
-                var discount = await _orderService.ApplyPromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount);
-                return Ok(new { discount, finalAmount = applyPromotionDto.OrderAmount - discount });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error applying promotion");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace elite.Controllers
-{
-    // Controllers/ProductsController.cs
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
-    {
-        private readonly IProductService _productService;
-        private readonly ILogger<ProductsController> _logger;
-
-        public ProductsController(IProductService productService, ILogger<ProductsController> logger)
-        {
-            _productService = productService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllProducts()
-        {
-            try
-            {
-                var products = await _productService.GetAllProductsAsync();
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all products");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("category/{category}")]
-        public async Task<IActionResult> GetProductsByCategory(string category)
-        {
-            try
-            {
-                var products = await _productService.GetProductsByCategoryAsync(category);
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting products by category");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProductById(int id)
-        {
-            try
-            {
-                var product = await _productService.GetProductByIdAsync(id);
-                return Ok(product);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting product by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateProduct([FromForm] ProductCreateDto productCreateDto)
-        {
-            try
-            {
-                var result = await _productService.CreateProductAsync(productCreateDto);
-                return CreatedAtAction(nameof(GetProductById), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating product");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        // Controllers/ProductsController.cs
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductUpdateDto productUpdateDto)
-        {
-            try
-            {
-                var result = await _productService.UpdateProductAsync(id, productUpdateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteProduct(int id)
-        {
-            try
-            {
-                var result = await _productService.DeleteProductAsync(id);
-                return Ok(new { message = "Product deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting product");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPatch("{id}/stock")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateProductStock(int id, [FromBody] int quantity)
-        {
-            try
-            {
-                var result = await _productService.UpdateProductStockAsync(id, quantity);
-                return Ok(new { message = "Product stock updated successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating product stock");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace elite.Controllers
-{
-    // Controllers/PromotionsController.cs
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
-    public class PromotionsController : ControllerBase
-    {
-        private readonly IPromotionService _promotionService;
-        private readonly ILogger<PromotionsController> _logger;
-
-        public PromotionsController(IPromotionService promotionService, ILogger<PromotionsController> logger)
-        {
-            _promotionService = promotionService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllPromotions()
-        {
-            try
-            {
-                var promotions = await _promotionService.GetAllPromotionsAsync();
-                return Ok(promotions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all promotions");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPromotionById(int id)
-        {
-            try
-            {
-                var promotion = await _promotionService.GetPromotionByIdAsync(id);
-                return Ok(promotion);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting promotion by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("code/{code}")]
-        public async Task<IActionResult> GetPromotionByCode(string code)
-        {
-            try
-            {
-                var promotion = await _promotionService.GetPromotionByCodeAsync(code);
-                return Ok(promotion);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting promotion by code");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreatePromotion([FromBody] PromotionCreateDto promotionCreateDto)
-        {
-            try
-            {
-                var result = await _promotionService.CreatePromotionAsync(promotionCreateDto);
-                return CreatedAtAction(nameof(GetPromotionById), new { id = result.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating promotion");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePromotion(int id, [FromBody] PromotionCreateDto promotionUpdateDto)
-        {
-            try
-            {
-                var result = await _promotionService.UpdatePromotionAsync(id, promotionUpdateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating promotion");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePromotion(int id)
-        {
-            try
-            {
-                var result = await _promotionService.DeletePromotionAsync(id);
-                return Ok(new { message = "Promotion deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting promotion");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost("validate")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ValidatePromotion([FromBody] ApplyPromotionDto applyPromotionDto)
-        {
-            try
-            {
-                var isValid = await _promotionService.ValidatePromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount);
-                return Ok(new { isValid });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating promotion");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
-using Microsoft.AspNetCore.Mvc;
-
-namespace elite.Controllers
-{
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TestController : ControllerBase
-    {
-        [HttpGet]
-        [Produces("application/json")]
-        public IActionResult Get()
-        {
-            return Ok(new { message = "API is working!", timestamp = DateTime.UtcNow });
-        }
-
-        [HttpGet("hello/{name}")]
-        [Produces("application/json")]
-        public IActionResult Hello(string name)
-        {
-            return Ok(new { message = $"Hello, {name}!", timestamp = DateTime.UtcNow });
-        }
-    }
-}
-using elite.DTOs;
-using elite.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace elite.Controllers
-{
-    // Controllers/TrainersController.cs
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TrainersController : ControllerBase
-    {
-        private readonly ITrainerService _trainerService;
-        private readonly ILogger<TrainersController> _logger;
-
-        public TrainersController(ITrainerService trainerService, ILogger<TrainersController> logger)
-        {
-            _trainerService = trainerService;
-            _logger = logger;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllTrainers()
-        {
-            try
-            {
-                var trainers = await _trainerService.GetAllTrainersAsync();
-                return Ok(trainers);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting all trainers");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetTrainerById(int id)
-        {
-            try
-            {
-                var trainer = await _trainerService.GetTrainerByIdAsync(id);
-                return Ok(trainer);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting trainer by ID");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> CreateTrainer([FromForm] TrainerCreateDto trainerCreateDto)
-        {
-            try
-            {
-                var result = await _trainerService.CreateTrainerAsync(trainerCreateDto);
-                return CreatedAtAction(nameof(GetTrainerById), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating trainer");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        // Controllers/TrainersController.cs
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UpdateTrainer(int id, [FromForm] TrainerUpdateDto trainerUpdateDto) // Changed parameter type
-        {
-            try
-            {
-                var result = await _trainerService.UpdateTrainerAsync(id, trainerUpdateDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating trainer");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-
-
-
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTrainer(int id)
-        {
-            try
-            {
-                var result = await _trainerService.DeleteTrainerAsync(id);
-                return Ok(new { message = "Trainer deleted successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting trainer");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}/classes")]
-        public async Task<IActionResult> GetTrainerClasses(int id)
-        {
-            try
-            {
-                var classes = await _trainerService.GetTrainerClassesAsync(id);
-                return Ok(classes);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting trainer classes");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-
-        [HttpGet("{id}/sessions")]
-        public async Task<IActionResult> GetTrainerSessions(int id)
-        {
-            try
-            {
-                var sessions = await _trainerService.GetTrainerSessionsAsync(id);
-                return Ok(sessions);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting trainer sessions");
-                return StatusCode(500, new { message = "Internal server error" });
-            }
-        }
-    }
-}
 using elite.Models;
 
 namespace elite.Data
@@ -1694,6 +417,8 @@ namespace elite.Data
         }
     }
 }
+
+
 using elite.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -1720,6 +445,7 @@ namespace elite.Data
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<MembershipType> MembershipTypes { get; set; }
+        public DbSet<PromotionUsage> PromotionUsages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -1736,6 +462,24 @@ namespace elite.Data
 
             modelBuilder.Entity<ClassSchedule>()
                 .HasCheckConstraint("CK_ClassSchedule_AvailableSlots", "[AvailableSlots] >= 0");
+
+            // Configure PromotionUsage relationships
+            modelBuilder.Entity<PromotionUsage>()
+                .HasOne(pu => pu.Promotion)
+                .WithMany(p => p.PromotionUsages)
+                .HasForeignKey(pu => pu.PromotionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PromotionUsage>()
+                .HasOne(pu => pu.User)
+                .WithMany()
+                .HasForeignKey(pu => pu.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Ensure a user can only use a promotion once
+            modelBuilder.Entity<PromotionUsage>()
+                .HasIndex(pu => new { pu.PromotionId, pu.UserId })
+                .IsUnique();
 
             // Seed data
             modelBuilder.Entity<Trainer>().HasData(
@@ -1779,6 +523,8 @@ namespace elite.Data
         }
     }
 }
+
+
 // Data/GymDbContextFactory.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -1805,6 +551,7 @@ namespace elite.Data
         }
     }
 }
+
 namespace elite.DTOs
 {
     public class DashboardStatsDto
@@ -1825,6 +572,8 @@ namespace elite.DTOs
         public int BookingsCount { get; set; }
     }
 }
+
+
 namespace elite.DTOs
 {
     public class AuthResponseDto
@@ -1834,435 +583,8 @@ namespace elite.DTOs
     }
 
 }
-using System.ComponentModel.DataAnnotations;
 
-namespace elite.DTOs
-{
-    public class CreateBookingDto
-    {
-        [Required]
-        public int UserId { get; set; }
 
-        [Required]
-        public string Type { get; set; }
-
-        [Required]
-        public int ScheduleId { get; set; }
-    }
-
-    public class BookingResponseDto
-    {
-        public int Id { get; set; }
-        public string Type { get; set; }
-        public int ScheduleId { get; set; }
-        public DateTime BookingDate { get; set; }
-        public string Status { get; set; }
-        public decimal HoursConsumed { get; set; }
-        public string ClassName { get; set; }
-        public string TrainerName { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string Location { get; set; }
-
-        // Add these properties for admin view
-        public int UserId { get; set; }
-        public string UserName { get; set; }
-        public string UserEmail { get; set; } // Add this
-    }
-
-    public class BookingCancellationDto
-    {
-        [Required]
-        public int BookingId { get; set; }
-
-        [Required]
-        public int UserId { get; set; }
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class ClassDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Duration { get; set; }
-        public int TrainerId { get; set; }
-        public string TrainerName { get; set; }
-        public int MaxCapacity { get; set; }
-        public decimal Price { get; set; }
-    }
-
-    public class ClassCreateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required, Range(0.5, 5)]
-        public decimal Duration { get; set; }
-
-        [Required]
-        public int TrainerId { get; set; }
-
-        [Required, Range(1, 50)]
-        public int MaxCapacity { get; set; }
-
-        public decimal Price { get; set; }
-    }
-
-    public class ClassScheduleDto
-    {
-        public int Id { get; set; }
-        public int ClassId { get; set; }
-        public string ClassName { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string Location { get; set; }
-        public int AvailableSlots { get; set; }
-        public int MaxCapacity { get; set; }
-    }
-
-    public class ClassScheduleCreateDto
-    {
-        [Required]
-        public int ClassId { get; set; }
-
-        [Required]
-        public DateTime StartTime { get; set; }
-
-        [Required]
-        public DateTime EndTime { get; set; }
-
-        [Required, MaxLength(200)]
-        public string Location { get; set; }
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class MembershipDto
-    {
-        public int Id { get; set; }
-        public string Type { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal TotalHours { get; set; }      // Change to decimal
-        public decimal RemainingHours { get; set; }  // Change to decimal
-        public string Status { get; set; }
-        public decimal PricePaid { get; set; }
-    }
-
-    public class PurchaseMembershipDto
-    {
-        [Required]
-        public int UserId { get; set; }
-
-        [Required]
-        public string Type { get; set; }
-    }
-
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class MembershipTypeDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public int DurationMonths { get; set; }
-        public decimal TotalHours { get; set; }  // Change from int to decimal
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; }
-    }
-
-    public class MembershipTypeCreateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required, Range(1, 12)]
-        public int DurationMonths { get; set; }
-
-        [Required, Range(1, 100)]
-        public decimal TotalHours { get; set; }  // Change from int to decimal
-
-        [Required, Range(0, 1000)]
-        public decimal Price { get; set; }
-    }
-
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class OnlineSessionDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Duration { get; set; }
-        public int TrainerId { get; set; }
-        public string TrainerName { get; set; }
-        public decimal Price { get; set; }
-    }
-
-    public class OnlineSessionCreateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required, Range(0.5, 5)]
-        public decimal Duration { get; set; }
-
-        [Required]
-        public int TrainerId { get; set; }
-
-        public decimal Price { get; set; }
-    }
-
-    public class OnlineSessionScheduleDto
-    {
-        public int Id { get; set; }
-        public int OnlineSessionId { get; set; }
-        public string SessionName { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public int AvailableSlots { get; set; }
-        public int MaxSlots { get; set; } = 20;
-    }
-
-    public class OnlineSessionScheduleCreateDto
-    {
-        [Required]
-        public int OnlineSessionId { get; set; }
-
-        [Required]
-        public DateTime StartTime { get; set; }
-
-        [Required]
-        public DateTime EndTime { get; set; }
-
-        [Range(1, 20)]
-        public int AvailableSlots { get; set; } = 20;
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class OrderDto
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string UserName { get; set; }
-        public DateTime OrderDate { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string Status { get; set; }
-        public List<OrderItemDto> OrderItems { get; set; }
-    }
-
-    public class OrderCreateDto
-    {
-        [Required]
-        public int UserId { get; set; }
-
-        public List<OrderItemCreateDto> Items { get; set; }
-
-        public string PromotionCode { get; set; }
-    }
-
-    public class OrderItemDto
-    {
-        public int Id { get; set; }
-        public int ProductId { get; set; }
-        public string ProductName { get; set; }
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal TotalPrice => Quantity * Price;
-    }
-
-    public class OrderItemCreateDto
-    {
-        [Required]
-        public int ProductId { get; set; }
-
-        [Required, Range(1, 10)]
-        public int Quantity { get; set; }
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class ProductDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public string ImageUrl { get; set; }
-        public string Category { get; set; }
-        public int StockQuantity { get; set; }
-    }
-
-    // From your DTOs/ProductCreateDto.cs
-    public class ProductCreateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-        [Required]
-        public string Description { get; set; }
-        [Required, Range(0, 1000)]
-        public decimal Price { get; set; }
-        public IFormFile ImageFile { get; set; } // For file upload
-        [Required]
-        public string Category { get; set; }
-        [Range(0, 1000)]
-        public int StockQuantity { get; set; }
-    }
-}
-// DTOs/ProductUpdateDto.cs
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class ProductUpdateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required, Range(0, 1000)]
-        public decimal Price { get; set; }
-
-        [Required]
-        public string Category { get; set; }
-
-        [Range(0, 1000)]
-        public int StockQuantity { get; set; }
-
-        public IFormFile? ImageFile { get; set; } // Optional for updates
-        public string? ExistingImageUrl { get; set; } // To track existing image
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class PromotionDto
-    {
-        public int Id { get; set; }
-        public string Code { get; set; }
-        public string Description { get; set; }
-        public string DiscountType { get; set; }
-        public decimal DiscountValue { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public int UsageLimit { get; set; }
-        public int TimesUsed { get; set; }
-    }
-
-    public class PromotionCreateDto
-    {
-        [Required, MaxLength(20)]
-        public string Code { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
-        [Required]
-        public string DiscountType { get; set; }
-
-        [Required, Range(0, 100)]
-        public decimal DiscountValue { get; set; }
-
-        [Required]
-        public DateTime StartDate { get; set; }
-
-        [Required]
-        public DateTime EndDate { get; set; }
-
-        [Range(1, 1000)]
-        public int UsageLimit { get; set; } = 100;
-    }
-
-    public class ApplyPromotionDto
-    {
-        [Required]
-        public string Code { get; set; }
-
-        [Required]
-        public decimal OrderAmount { get; set; }
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class TrainerDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Specialization { get; set; }
-        public int ExperienceYears { get; set; }
-        public string Certifications { get; set; }
-        public string Bio { get; set; }
-        public string ImageUrl { get; set; }
-    }
-
-    public class TrainerCreateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-        [Required, MaxLength(100)]
-        public string Specialization { get; set; }
-        [Required, Range(0, 50)]
-        public int ExperienceYears { get; set; }
-        public string Certifications { get; set; }
-        [Required]
-        public string Bio { get; set; }
-        public IFormFile ImageFile { get; set; } // For file upload
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.DTOs
-{
-    public class TrainerUpdateDto
-    {
-        [Required, MaxLength(100)]
-        public string Name { get; set; }
-
-        [Required, MaxLength(100)]
-        public string Specialization { get; set; }
-
-        [Required, Range(0, 50)]
-        public int ExperienceYears { get; set; }
-
-        public string Certifications { get; set; }
-
-        [Required]
-        public string Bio { get; set; }
-
-        public IFormFile? ImageFile { get; set; } // Optional for updates
-    }
-}
 using System.ComponentModel.DataAnnotations;
 
 namespace elite.DTOs
@@ -2309,7 +631,19 @@ namespace elite.DTOs
         [Phone, MaxLength(20)]
         public string Phone { get; set; }
     }
+
+
+    public class ChangePasswordDto
+    {
+        [Required]
+        public string CurrentPassword { get; set; }
+
+        [Required, MinLength(6)]
+        public string NewPassword { get; set; }
+    }
 }
+
+
 using elite.DTOs;
 
 namespace elite.Interfaces
@@ -2329,6 +663,8 @@ namespace elite.Interfaces
 
     }
 }
+
+
 using elite.DTOs;
 
 namespace elite.Interfaces
@@ -2342,179 +678,67 @@ namespace elite.Interfaces
         Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
     }
 }
-// Interfaces/IBookingService.cs
-using elite.DTOs;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace elite.Interfaces
-{
-    public interface IBookingService
-    {
-        Task<BookingResponseDto> CreateBookingAsync(CreateBookingDto bookingDto);
-        Task<bool> CancelBookingAsync(int bookingId, int userId);
-        Task<IEnumerable<BookingResponseDto>> GetUserBookingsAsync(int userId);
-        Task<BookingResponseDto> GetBookingDetailsAsync(int bookingId);
-        Task<IEnumerable<BookingResponseDto>> GetBookingsByDateRangeAsync(DateTime startDate, DateTime endDate);
-    }
-}
-using elite.DTOs;
 
-namespace elite.Interfaces
-{
-    // Interfaces/IClassService.cs
-    public interface IClassService
-    {
-        Task<IEnumerable<ClassDto>> GetAllClassesAsync();
-        Task<ClassDto> GetClassByIdAsync(int id);
-        Task<ClassDto> CreateClassAsync(ClassCreateDto classCreateDto);
-        Task<ClassDto> UpdateClassAsync(int id, ClassCreateDto classUpdateDto);
-        Task<bool> DeleteClassAsync(int id);
-        Task<IEnumerable<ClassScheduleDto>> GetClassSchedulesAsync(int classId);
-        Task<ClassScheduleDto> CreateClassScheduleAsync(ClassScheduleCreateDto scheduleCreateDto);
-        Task<bool> DeleteClassScheduleAsync(int scheduleId);
-    }
-}
-namespace elite.Interfaces
-{
-    public interface IImageService
-    {
-        Task<string> UploadImageAsync(IFormFile imageFile, string folderName);
-        void DeleteImage(string imagePath);
-        bool ImageExists(string imagePath);
-    }
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    public interface IMembershipService
-    {
-        Task<MembershipDto> PurchaseMembershipAsync(PurchaseMembershipDto purchaseDto);
-        Task<MembershipDto> GetUserMembershipAsync(int userId);
-        Task<bool> CheckMembershipValidityAsync(int userId);
-        Task<bool> ExtendMembershipAsync(int membershipId, int additionalMonths);
-        Task<bool> UpgradeMembershipAsync(int membershipId, string newType);
-    }
-}
-// Interfaces/IMembershipTypeService.cs
-using elite.DTOs;
-using System.Threading.Tasks;
-
-namespace elite.Interfaces
-{
-    public interface IMembershipTypeService
-    {
-        Task<IEnumerable<MembershipTypeDto>> GetAllMembershipTypesAsync();
-        Task<MembershipTypeDto> GetMembershipTypeByIdAsync(int id);
-        Task<MembershipTypeDto> CreateMembershipTypeAsync(MembershipTypeCreateDto createDto);
-        Task<MembershipTypeDto> UpdateMembershipTypeAsync(int id, MembershipTypeCreateDto updateDto);
-        Task<bool> DeleteMembershipTypeAsync(int id);
-        Task<bool> ToggleMembershipTypeStatusAsync(int id, bool isActive);
-    }
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    // Interfaces/IOnlineSessionService.cs
-    public interface IOnlineSessionService
-    {
-        Task<IEnumerable<OnlineSessionDto>> GetAllSessionsAsync();
-        Task<OnlineSessionDto> GetSessionByIdAsync(int id);
-        Task<OnlineSessionDto> CreateSessionAsync(OnlineSessionCreateDto sessionCreateDto);
-        Task<OnlineSessionDto> UpdateSessionAsync(int id, OnlineSessionCreateDto sessionUpdateDto);
-        Task<bool> DeleteSessionAsync(int id);
-        Task<IEnumerable<OnlineSessionScheduleDto>> GetSessionSchedulesAsync(int sessionId);
-        Task<OnlineSessionScheduleDto> CreateSessionScheduleAsync(OnlineSessionScheduleCreateDto scheduleCreateDto);
-        Task<bool> DeleteSessionScheduleAsync(int scheduleId);
-    }
-
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    public interface IOrderService
-    {
-        Task<OrderDto> CreateOrderAsync(OrderCreateDto orderCreateDto);
-        Task<OrderDto> GetOrderByIdAsync(int id);
-        Task<IEnumerable<OrderDto>> GetUserOrdersAsync(int userId);
-        Task<IEnumerable<OrderDto>> GetAllOrdersAsync();
-        Task<bool> UpdateOrderStatusAsync(int id, string status);
-        Task<bool> CancelOrderAsync(int id);
-        Task<decimal> ApplyPromotionAsync(string code, decimal orderAmount);
-    }
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    public interface IProductService
-    {
-        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
-        Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(string category);
-        Task<ProductDto> GetProductByIdAsync(int id);
-        Task<ProductDto> CreateProductAsync(ProductCreateDto productCreateDto);
-        Task<ProductDto> UpdateProductAsync(int id, ProductUpdateDto productUpdateDto);
-        Task<bool> DeleteProductAsync(int id);
-        Task<bool> UpdateProductStockAsync(int id, int quantity);
-    }
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    public interface IPromotionService
-    {
-        Task<IEnumerable<PromotionDto>> GetAllPromotionsAsync();
-        Task<PromotionDto> GetPromotionByIdAsync(int id);
-        Task<PromotionDto> GetPromotionByCodeAsync(string code);
-        Task<PromotionDto> CreatePromotionAsync(PromotionCreateDto promotionCreateDto);
-        Task<PromotionDto> UpdatePromotionAsync(int id, PromotionCreateDto promotionUpdateDto);
-        Task<bool> DeletePromotionAsync(int id);
-        Task<bool> ValidatePromotionAsync(string code, decimal orderAmount);
-        Task<decimal> CalculateDiscountAsync(string code, decimal orderAmount);
-    }
-}
-using elite.DTOs;
-
-namespace elite.Interfaces
-{
-    public interface ITrainerService
-    {
-        Task<IEnumerable<TrainerDto>> GetAllTrainersAsync();
-        Task<TrainerDto> GetTrainerByIdAsync(int id);
-        Task<TrainerDto> CreateTrainerAsync(TrainerCreateDto trainerCreateDto);
-        Task<TrainerDto> UpdateTrainerAsync(int id, TrainerUpdateDto trainerUpdateDto); // Changed parameter type
-        Task<bool> DeleteTrainerAsync(int id);
-        Task<IEnumerable<ClassDto>> GetTrainerClassesAsync(int trainerId);
-        Task<IEnumerable<OnlineSessionDto>> GetTrainerSessionsAsync(int trainerId);
-    }
-}
 namespace elite.Middleware
 {
-    public class CorrelationMiddleware
+    public class RequestLoggingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<RequestLoggingMiddleware> _logger;
 
-        public CorrelationMiddleware(RequestDelegate next)
+        public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var correlationId = context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
-                              ?? Guid.NewGuid().ToString();
+            var startTime = DateTime.UtcNow;
 
-            context.Response.Headers["X-Correlation-ID"] = correlationId;
-            context.Items["CorrelationId"] = correlationId;
+            _logger.LogInformation("Request started: {Method} {Path}",
+                context.Request.Method, context.Request.Path);
 
             await _next(context);
+
+            var duration = DateTime.UtcNow - startTime;
+            _logger.LogInformation("Request completed: {Method} {Path} - {StatusCode} in {Duration}ms",
+                context.Request.Method, context.Request.Path, context.Response.StatusCode, duration.TotalMilliseconds);
         }
     }
 }
+
+namespace elite.Middleware
+{
+    public class PerformanceMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly ILogger<PerformanceMiddleware> _logger;
+
+        public PerformanceMiddleware(RequestDelegate next, ILogger<PerformanceMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            await _next(context);
+
+            stopwatch.Stop();
+
+            if (stopwatch.ElapsedMilliseconds > 1000) // Log slow requests
+            {
+                _logger.LogWarning("Slow request: {Method} {Path} took {ElapsedMs}ms",
+                    context.Request.Method, context.Request.Path, stopwatch.ElapsedMilliseconds);
+            }
+        }
+    }
+}
+
 using System.Text.Json;
 
 namespace elite.Middleware
@@ -2573,63 +797,32 @@ namespace elite.Middleware
         }
     }
 }
+
+
 namespace elite.Middleware
 {
-    public class PerformanceMiddleware
+    public class CorrelationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<PerformanceMiddleware> _logger;
 
-        public PerformanceMiddleware(RequestDelegate next, ILogger<PerformanceMiddleware> logger)
+        public CorrelationMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            var correlationId = context.Request.Headers["X-Correlation-ID"].FirstOrDefault()
+                              ?? Guid.NewGuid().ToString();
+
+            context.Response.Headers["X-Correlation-ID"] = correlationId;
+            context.Items["CorrelationId"] = correlationId;
 
             await _next(context);
-
-            stopwatch.Stop();
-
-            if (stopwatch.ElapsedMilliseconds > 1000) // Log slow requests
-            {
-                _logger.LogWarning("Slow request: {Method} {Path} took {ElapsedMs}ms",
-                    context.Request.Method, context.Request.Path, stopwatch.ElapsedMilliseconds);
-            }
         }
     }
 }
-namespace elite.Middleware
-{
-    public class RequestLoggingMiddleware
-    {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<RequestLoggingMiddleware> _logger;
 
-        public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
-
-        public async Task InvokeAsync(HttpContext context)
-        {
-            var startTime = DateTime.UtcNow;
-
-            _logger.LogInformation("Request started: {Method} {Path}",
-                context.Request.Method, context.Request.Path);
-
-            await _next(context);
-
-            var duration = DateTime.UtcNow - startTime;
-            _logger.LogInformation("Request completed: {Method} {Path} - {StatusCode} in {Duration}ms",
-                context.Request.Method, context.Request.Path, context.Response.StatusCode, duration.TotalMilliseconds);
-        }
-    }
-}
 namespace elite.Models
 {
     public class Admin
@@ -2641,189 +834,8 @@ namespace elite.Models
         public string Role { get; set; } = "Admin";
     }
 }
-namespace elite.Models
-{
-    public class Booking
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string Type { get; set; } // "Class" or "OnlineSession"
-        public int ScheduleId { get; set; }
-        public DateTime BookingDate { get; set; }
-        public string Status { get; set; } // Confirmed/Cancelled/Completed
-        public decimal HoursConsumed { get; set; }
 
-        public virtual User User { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class Class
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Duration { get; set; }
-        public int TrainerId { get; set; }
-        public int MaxCapacity { get; set; }
-        public decimal Price { get; set; }
 
-        public virtual Trainer Trainer { get; set; }
-        public virtual ICollection<ClassSchedule> Schedules { get; set; }
-    }
-
-}
-namespace elite.Models
-{
-    public class ClassSchedule
-    {
-        public int Id { get; set; }
-        public int ClassId { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string Location { get; set; }
-        public int AvailableSlots { get; set; }
-
-        public virtual Class Class { get; set; }
-        public virtual ICollection<Booking> Bookings { get; set; }
-    }
-}
-using System.ComponentModel.DataAnnotations;
-
-namespace elite.Models
-{
-    public class Membership
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public string Type { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal TotalHours { get; set; }       // Change this to decimal too!
-        public decimal RemainingHours { get; set; }   // Changed to decimal
-        public string Status { get; set; }
-        public decimal PricePaid { get; set; }
-
-        public virtual User User { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class MembershipType
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public int DurationMonths { get; set; }
-        public decimal TotalHours { get; set; }      
-        public decimal Price { get; set; }
-        public bool IsActive { get; set; } = true;
-    }
-}
-namespace elite.Models
-{
-    public class OnlineSession
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Duration { get; set; }
-        public int TrainerId { get; set; }
-        public decimal Price { get; set; }
-
-        public virtual Trainer Trainer { get; set; }
-        public virtual ICollection<OnlineSessionSchedule> Schedules { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class OnlineSessionSchedule
-    {
-        public int Id { get; set; }
-        public int OnlineSessionId { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public int AvailableSlots { get; set; }
-
-        public virtual OnlineSession OnlineSession { get; set; }
-        public virtual ICollection<Booking> Bookings { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class Order
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public DateTime OrderDate { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string Status { get; set; } // Pending/Completed/Cancelled
-
-        public virtual User User { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class OrderItem
-    {
-        public int Id { get; set; }
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
-
-        public virtual Order Order { get; set; }
-        public virtual Product Product { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class Product
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public decimal Price { get; set; }
-        public string ImageUrl { get; set; }
-        public string Category { get; set; } // Apparel/Supplements
-
-        public int StockQuantity { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
-    }
-
-}
-namespace elite.Models
-{
-    public class Promotion
-    {
-        public int Id { get; set; }
-        public string Code { get; set; }
-        public string Description { get; set; }
-        public string DiscountType { get; set; } // Percentage/Fixed
-        public decimal DiscountValue { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public int UsageLimit { get; set; }
-        public int TimesUsed { get; set; }
-    }
-}
-namespace elite.Models
-{
-    public class Trainer
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Specialization { get; set; }
-        public int ExperienceYears { get; set; }
-        public string Certifications { get; set; }
-        public string Bio { get; set; }
-        public string ImageUrl { get; set; }
-
-        public virtual ICollection<Class> Classes { get; set; }
-        public virtual ICollection<OnlineSession> OnlineSessions { get; set; }
-    }
-}
 using System.ComponentModel.DataAnnotations;
 
 namespace elite.Models
@@ -2854,6 +866,9 @@ namespace elite.Models
         public virtual ICollection<Order> Orders { get; set; }
     }
 }
+
+
+
 using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
@@ -3206,6 +1221,7 @@ namespace elite.Services
         }
     }
 }
+
 using elite.Data;
 using elite.DTOs;
 using elite.Interfaces;
@@ -3391,2029 +1407,8 @@ namespace elite.Services
     }
 
 }
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace elite.Services
-{
-    public class BookingService : IBookingService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<BookingService> _logger;
 
-        public BookingService(GymDbContext context, ILogger<BookingService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<BookingResponseDto> CreateBookingAsync(CreateBookingDto bookingDto)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var user = await _context.Users
-                    .Include(u => u.Membership)
-                    .FirstOrDefaultAsync(u => u.Id == bookingDto.UserId);
-
-                if (user == null) throw new ArgumentException("User not found");
-
-                if (user.Membership == null || user.Membership.Status != "Active")
-                    throw new InvalidOperationException("User does not have an active membership");
-
-                if (user.Membership.EndDate < DateTime.UtcNow.Date)
-                {
-                    user.Membership.Status = "Expired";
-                    await _context.SaveChangesAsync();
-                    throw new InvalidOperationException("Membership has expired");
-                }
-
-                decimal duration = 0;
-                string className = string.Empty;
-                string trainerName = string.Empty;
-                DateTime startTime, endTime;
-                string location = string.Empty;
-
-                if (bookingDto.Type == "Class")
-                {
-                    var schedule = await _context.ClassSchedules
-                        .Include(cs => cs.Class)
-                        .ThenInclude(c => c.Trainer)
-                        .FirstOrDefaultAsync(cs => cs.Id == bookingDto.ScheduleId);
-
-                    if (schedule == null) throw new ArgumentException("Class schedule not found");
-                    if (schedule.AvailableSlots <= 0) throw new InvalidOperationException("No available slots");
-                    if (schedule.StartTime <= DateTime.UtcNow) throw new InvalidOperationException("Class has already started");
-
-                    // FIX: Convert minutes to hours
-                    duration = schedule.Class.Duration / 60.0m;
-                    className = schedule.Class.Name;
-                    trainerName = schedule.Class.Trainer.Name;
-                    startTime = schedule.StartTime;
-                    endTime = schedule.EndTime;
-                    location = schedule.Location;
-
-                    var existingBooking = await _context.Bookings
-                        .FirstOrDefaultAsync(b => b.UserId == bookingDto.UserId &&
-                                                 b.Type == "Class" &&
-                                                 b.ScheduleId == bookingDto.ScheduleId &&
-                                                 b.Status == "Confirmed");
-
-                    if (existingBooking != null) throw new InvalidOperationException("User already booked this class");
-
-                    schedule.AvailableSlots--;
-                    _context.ClassSchedules.Update(schedule);
-                }
-                else if (bookingDto.Type == "OnlineSession")
-                {
-                    var schedule = await _context.OnlineSessionSchedules
-                        .Include(oss => oss.OnlineSession)
-                        .ThenInclude(os => os.Trainer)
-                        .FirstOrDefaultAsync(oss => oss.Id == bookingDto.ScheduleId);
-
-                    if (schedule == null) throw new ArgumentException("Online session schedule not found");
-                    if (schedule.AvailableSlots <= 0) throw new InvalidOperationException("No available slots");
-                    if (schedule.StartTime <= DateTime.UtcNow) throw new InvalidOperationException("Session has already started");
-
-                    // FIX: Convert minutes to hours
-                    duration = schedule.OnlineSession.Duration / 60.0m;
-                    className = schedule.OnlineSession.Name;
-                    trainerName = schedule.OnlineSession.Trainer.Name;
-                    startTime = schedule.StartTime;
-                    endTime = schedule.EndTime;
-
-                    schedule.AvailableSlots--;
-                    _context.OnlineSessionSchedules.Update(schedule);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid booking type");
-                }
-
-                if (user.Membership.RemainingHours < duration)
-                    throw new InvalidOperationException("Insufficient hours in membership");
-
-                user.Membership.RemainingHours -= duration;
-                _context.Memberships.Update(user.Membership);
-
-                var booking = new Booking
-                {
-                    UserId = bookingDto.UserId,
-                    Type = bookingDto.Type,
-                    ScheduleId = bookingDto.ScheduleId,
-                    BookingDate = DateTime.UtcNow,
-                    Status = "Confirmed",
-                    HoursConsumed = duration
-                };
-
-                _context.Bookings.Add(booking);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new BookingResponseDto
-                {
-                    Id = booking.Id,
-                    Type = booking.Type,
-                    ScheduleId = booking.ScheduleId,
-                    BookingDate = booking.BookingDate,
-                    Status = booking.Status,
-                    HoursConsumed = booking.HoursConsumed,
-                    ClassName = className,
-                    TrainerName = trainerName,
-                    StartTime = startTime,
-                    EndTime = endTime,
-                    Location = location
-                };
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error creating booking");
-                throw;
-            }
-        }
-
-        public async Task<bool> CancelBookingAsync(int bookingId, int userId)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var booking = await _context.Bookings
-                    .Include(b => b.User)
-                    .ThenInclude(u => u.Membership)
-                    .FirstOrDefaultAsync(b => b.Id == bookingId && b.UserId == userId);
-
-                if (booking == null) throw new ArgumentException("Booking not found");
-                if (booking.Status != "Confirmed") throw new InvalidOperationException("Booking cannot be cancelled");
-
-                DateTime scheduleTime;
-                decimal duration = booking.HoursConsumed;
-
-                if (booking.Type == "Class")
-                {
-                    var schedule = await _context.ClassSchedules.FindAsync(booking.ScheduleId);
-                    if (schedule == null) throw new ArgumentException("Class schedule not found");
-
-                    scheduleTime = schedule.StartTime;
-
-                    // Check cancellation policy (>24 hours)
-                    if ((scheduleTime - DateTime.UtcNow).TotalHours > 24)
-                    {
-                        // Refund hours
-                        booking.User.Membership.RemainingHours += duration; // FIX: Removed (int) cast
-                        _context.Memberships.Update(booking.User.Membership);
-
-                        // Increment available slots
-                        schedule.AvailableSlots++;
-                        _context.ClassSchedules.Update(schedule);
-                    }
-                }
-                else
-                {
-                    var schedule = await _context.OnlineSessionSchedules.FindAsync(booking.ScheduleId);
-                    if (schedule == null) throw new ArgumentException("Online session schedule not found");
-
-                    scheduleTime = schedule.StartTime;
-
-                    // Check cancellation policy (>24 hours)
-                    if ((scheduleTime - DateTime.UtcNow).TotalHours > 24)
-                    {
-                        // Refund hours
-                        booking.User.Membership.RemainingHours += duration; // FIX: Removed (int) cast
-                        _context.Memberships.Update(booking.User.Membership);
-
-                        // Increment available slots
-                        schedule.AvailableSlots++;
-                        _context.OnlineSessionSchedules.Update(schedule);
-                    }
-                }
-
-                booking.Status = "Cancelled";
-                _context.Bookings.Update(booking);
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error cancelling booking");
-                throw;
-            }
-        }
-
-        public async Task<IEnumerable<BookingResponseDto>> GetUserBookingsAsync(int userId)
-        {
-            var bookings = await _context.Bookings
-                .Where(b => b.UserId == userId)
-                .OrderByDescending(b => b.BookingDate)
-                .Select(b => new BookingResponseDto
-                {
-                    Id = b.Id,
-                    Type = b.Type,
-                    ScheduleId = b.ScheduleId,
-                    BookingDate = b.BookingDate,
-                    Status = b.Status,
-                    HoursConsumed = b.HoursConsumed,
-                    ClassName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Name)
-                            .FirstOrDefault(),
-                    TrainerName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Trainer.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Trainer.Name)
-                            .FirstOrDefault(),
-                    StartTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.StartTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.StartTime)
-                            .FirstOrDefault(),
-                    EndTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.EndTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.EndTime)
-                            .FirstOrDefault(),
-                    Location = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Location)
-                            .FirstOrDefault()
-                        : "Online"
-                })
-                .ToListAsync();
-
-            return bookings;
-        }
-
-        // Services/BookingService.cs
-        public async Task<BookingResponseDto> GetBookingDetailsAsync(int bookingId)
-        {
-            var booking = await _context.Bookings
-                .Include(b => b.User) // Include the User navigation property
-                .Where(b => b.Id == bookingId)
-                .Select(b => new BookingResponseDto
-                {
-                    Id = b.Id,
-                    Type = b.Type,
-                    ScheduleId = b.ScheduleId,
-                    BookingDate = b.BookingDate,
-                    Status = b.Status,
-                    HoursConsumed = b.HoursConsumed,
-                    UserId = b.UserId,
-                    UserName = b.User.Name,
-                    ClassName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Name)
-                            .FirstOrDefault(),
-                    TrainerName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Trainer.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Trainer.Name)
-                            .FirstOrDefault(),
-                    StartTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.StartTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.StartTime)
-                            .FirstOrDefault(),
-                    EndTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.EndTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.EndTime)
-                            .FirstOrDefault(),
-                    Location = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Location)
-                            .FirstOrDefault()
-                        : "Online"
-                })
-                .FirstOrDefaultAsync();
-
-            if (booking == null) throw new ArgumentException("Booking not found");
-            return booking;
-        }
-
-
-
-
-        public async Task<IEnumerable<BookingResponseDto>> GetBookingsByDateRangeAsync(DateTime startDate, DateTime endDate)
-        {
-            var bookings = await _context.Bookings
-                .Where(b => b.BookingDate >= startDate && b.BookingDate <= endDate)
-                .OrderByDescending(b => b.BookingDate)
-                .Select(b => new BookingResponseDto
-                {
-                    Id = b.Id,
-                    Type = b.Type,
-                    ScheduleId = b.ScheduleId,
-                    BookingDate = b.BookingDate,
-                    Status = b.Status,
-                    HoursConsumed = b.HoursConsumed,
-                    ClassName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Name)
-                            .FirstOrDefault(),
-                    TrainerName = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Class.Trainer.Name)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.OnlineSession.Trainer.Name)
-                            .FirstOrDefault(),
-                    StartTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.StartTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.StartTime)
-                            .FirstOrDefault(),
-                    EndTime = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.EndTime)
-                            .FirstOrDefault()
-                        : _context.OnlineSessionSchedules
-                            .Where(oss => oss.Id == b.ScheduleId)
-                            .Select(oss => oss.EndTime)
-                            .FirstOrDefault(),
-                    Location = b.Type == "Class"
-                        ? _context.ClassSchedules
-                            .Where(cs => cs.Id == b.ScheduleId)
-                            .Select(cs => cs.Location)
-                            .FirstOrDefault()
-                        : "Online"
-                })
-                .ToListAsync();
-
-            return bookings;
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    // Services/ClassService.cs
-    public class ClassService : IClassService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<ClassService> _logger;
-
-        public ClassService(GymDbContext context, ILogger<ClassService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<IEnumerable<ClassDto>> GetAllClassesAsync()
-        {
-            return await _context.Classes
-                .Include(c => c.Trainer)
-                .Select(c => new ClassDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    Duration = c.Duration,
-                    TrainerId = c.TrainerId,
-                    TrainerName = c.Trainer.Name,
-                    MaxCapacity = c.MaxCapacity,
-                    Price = c.Price
-                })
-                .ToListAsync();
-        }
-
-        public async Task<ClassDto> GetClassByIdAsync(int id)
-        {
-            var classObj = await _context.Classes
-                .Include(c => c.Trainer)
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (classObj == null) throw new ArgumentException("Class not found");
-
-            return new ClassDto
-            {
-                Id = classObj.Id,
-                Name = classObj.Name,
-                Description = classObj.Description,
-                Duration = classObj.Duration,
-                TrainerId = classObj.TrainerId,
-                TrainerName = classObj.Trainer.Name,
-                MaxCapacity = classObj.MaxCapacity,
-                Price = classObj.Price
-            };
-        }
-
-        public async Task<ClassDto> CreateClassAsync(ClassCreateDto classCreateDto)
-        {
-            // Check if trainer exists
-            var trainer = await _context.Trainers.FindAsync(classCreateDto.TrainerId);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            var classObj = new Class
-            {
-                Name = classCreateDto.Name,
-                Description = classCreateDto.Description,
-                Duration = classCreateDto.Duration,
-                TrainerId = classCreateDto.TrainerId,
-                MaxCapacity = classCreateDto.MaxCapacity,
-                Price = classCreateDto.Price
-            };
-
-            _context.Classes.Add(classObj);
-            await _context.SaveChangesAsync();
-
-            return new ClassDto
-            {
-                Id = classObj.Id,
-                Name = classObj.Name,
-                Description = classObj.Description,
-                Duration = classObj.Duration,
-                TrainerId = classObj.TrainerId,
-                TrainerName = trainer.Name,
-                MaxCapacity = classObj.MaxCapacity,
-                Price = classObj.Price
-            };
-        }
-
-        public async Task<ClassDto> UpdateClassAsync(int id, ClassCreateDto classUpdateDto)
-        {
-            var classObj = await _context.Classes.FindAsync(id);
-            if (classObj == null) throw new ArgumentException("Class not found");
-
-            // Check if trainer exists
-            var trainer = await _context.Trainers.FindAsync(classUpdateDto.TrainerId);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            classObj.Name = classUpdateDto.Name;
-            classObj.Description = classUpdateDto.Description;
-            classObj.Duration = classUpdateDto.Duration;
-            classObj.TrainerId = classUpdateDto.TrainerId;
-            classObj.MaxCapacity = classUpdateDto.MaxCapacity;
-            classObj.Price = classUpdateDto.Price;
-
-            _context.Classes.Update(classObj);
-            await _context.SaveChangesAsync();
-
-            return new ClassDto
-            {
-                Id = classObj.Id,
-                Name = classObj.Name,
-                Description = classObj.Description,
-                Duration = classObj.Duration,
-                TrainerId = classObj.TrainerId,
-                TrainerName = trainer.Name,
-                MaxCapacity = classObj.MaxCapacity,
-                Price = classObj.Price
-            };
-        }
-
-        public async Task<bool> DeleteClassAsync(int id)
-        {
-            var classObj = await _context.Classes.FindAsync(id);
-            if (classObj == null) throw new ArgumentException("Class not found");
-
-            // Check if class has any schedules
-            var hasSchedules = await _context.ClassSchedules.AnyAsync(cs => cs.ClassId == id);
-            if (hasSchedules) throw new InvalidOperationException("Cannot delete class with existing schedules");
-
-            _context.Classes.Remove(classObj);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<ClassScheduleDto>> GetClassSchedulesAsync(int classId)
-        {
-            return await _context.ClassSchedules
-                .Where(cs => cs.ClassId == classId)
-                .Include(cs => cs.Class)
-                .Select(cs => new ClassScheduleDto
-                {
-                    Id = cs.Id,
-                    ClassId = cs.ClassId,
-                    ClassName = cs.Class.Name,
-                    StartTime = cs.StartTime,
-                    EndTime = cs.EndTime,
-                    Location = cs.Location,
-                    AvailableSlots = cs.AvailableSlots,
-                    MaxCapacity = cs.Class.MaxCapacity
-                })
-                .ToListAsync();
-        }
-
-        public async Task<ClassScheduleDto> CreateClassScheduleAsync(ClassScheduleCreateDto scheduleCreateDto)
-        {
-            var classObj = await _context.Classes.FindAsync(scheduleCreateDto.ClassId);
-            if (classObj == null) throw new ArgumentException("Class not found");
-
-            // Check if the schedule overlaps with existing schedules
-            var overlappingSchedule = await _context.ClassSchedules
-                .Where(cs => cs.ClassId == scheduleCreateDto.ClassId)
-                .Where(cs => cs.StartTime < scheduleCreateDto.EndTime && cs.EndTime > scheduleCreateDto.StartTime)
-                .FirstOrDefaultAsync();
-
-            if (overlappingSchedule != null)
-                throw new InvalidOperationException("Schedule overlaps with existing class schedule");
-
-            var schedule = new ClassSchedule
-            {
-                ClassId = scheduleCreateDto.ClassId,
-                StartTime = scheduleCreateDto.StartTime,
-                EndTime = scheduleCreateDto.EndTime,
-                Location = scheduleCreateDto.Location,
-                AvailableSlots = classObj.MaxCapacity
-            };
-
-            _context.ClassSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
-
-            return new ClassScheduleDto
-            {
-                Id = schedule.Id,
-                ClassId = schedule.ClassId,
-                ClassName = classObj.Name,
-                StartTime = schedule.StartTime,
-                EndTime = schedule.EndTime,
-                Location = schedule.Location,
-                AvailableSlots = schedule.AvailableSlots,
-                MaxCapacity = classObj.MaxCapacity
-            };
-        }
-
-        public async Task<bool> DeleteClassScheduleAsync(int scheduleId)
-        {
-            var schedule = await _context.ClassSchedules.FindAsync(scheduleId);
-            if (schedule == null) throw new ArgumentException("Class schedule not found");
-
-            // Check if schedule has any bookings
-            var hasBookings = await _context.Bookings.AnyAsync(b => b.ScheduleId == scheduleId && b.Type == "Class");
-            if (hasBookings) throw new InvalidOperationException("Cannot delete schedule with existing bookings");
-
-            _context.ClassSchedules.Remove(schedule);
-            return await _context.SaveChangesAsync() > 0;
-        }
-    }
-}
-using elite.Interfaces;
-
-namespace elite.Services
-{
-    public class ImageService : IImageService
-    {
-        private readonly IWebHostEnvironment _environment;
-        private readonly ILogger<ImageService> _logger;
-
-        public ImageService(IWebHostEnvironment environment, ILogger<ImageService> logger)
-        {
-            _environment = environment;
-            _logger = logger;
-        }
-
-        // Services/ImageService.cs
-        public async Task<string> UploadImageAsync(IFormFile imageFile, string folderName)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                throw new ArgumentException("No file uploaded.");
-
-            // Validate file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-
-            if (!allowedExtensions.Contains(fileExtension))
-                throw new ArgumentException("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
-
-            // Check if WebRootPath is set
-            if (string.IsNullOrEmpty(_environment.WebRootPath))
-            {
-                _logger.LogError("WebRootPath is not set");
-                throw new InvalidOperationException("WebRootPath is not configured");
-            }
-
-            // Create directory if it doesn't exist
-            string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", folderName);
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            // Generate unique filename
-            string uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
-            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            // Save file
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(fileStream);
-            }
-
-            // Return relative path
-            return Path.Combine("images", folderName, uniqueFileName).Replace("\\", "/");
-        }
-
-        public void DeleteImage(string imagePath)
-        {
-            if (string.IsNullOrEmpty(imagePath))
-                return;
-
-            if (string.IsNullOrEmpty(_environment.WebRootPath))
-            {
-                _logger.LogError("WebRootPath is not set");
-                return;
-            }
-
-            try
-            {
-                string fullPath = Path.Combine(_environment.WebRootPath, imagePath);
-                if (File.Exists(fullPath))
-                {
-                    File.Delete(fullPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting image: {ImagePath}", imagePath);
-            }
-        }
-
-        public bool ImageExists(string imagePath)
-        {
-            if (string.IsNullOrEmpty(imagePath))
-                return false;
-
-            string fullPath = Path.Combine(_environment.WebRootPath, imagePath);
-            return File.Exists(fullPath);
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    public class MembershipService : IMembershipService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<MembershipService> _logger;
-
-        public MembershipService(GymDbContext context, ILogger<MembershipService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<MembershipDto> PurchaseMembershipAsync(PurchaseMembershipDto purchaseDto)
-        {
-            var user = await _context.Users.FindAsync(purchaseDto.UserId);
-            if (user == null) throw new ArgumentException("User not found");
-
-            // Check if user already has active membership
-            var existingMembership = await _context.Memberships
-                .FirstOrDefaultAsync(m => m.UserId == purchaseDto.UserId && m.Status == "Active");
-
-            if (existingMembership != null)
-                throw new InvalidOperationException("User already has an active membership");
-
-            // Get membership type details
-            var membershipType = await _context.MembershipTypes
-                .FirstOrDefaultAsync(mt => mt.Name == purchaseDto.Type && mt.IsActive);
-
-            if (membershipType == null)
-                throw new ArgumentException("Invalid membership type or type not available");
-
-            var membership = new Membership
-            {
-                UserId = purchaseDto.UserId,
-                Type = membershipType.Name,
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddMonths(membershipType.DurationMonths),
-                TotalHours = membershipType.TotalHours,
-                RemainingHours = membershipType.TotalHours,
-                Status = "Active",
-                PricePaid = membershipType.Price
-            };
-
-            _context.Memberships.Add(membership);
-            await _context.SaveChangesAsync();
-
-            return new MembershipDto
-            {
-                Id = membership.Id,
-                Type = membership.Type,
-                StartDate = membership.StartDate,
-                EndDate = membership.EndDate,
-                TotalHours = membership.TotalHours,
-                RemainingHours = membership.RemainingHours,
-                Status = membership.Status,
-                PricePaid = membership.PricePaid // Add this line
-            };
-        }
-
-        public async Task<MembershipDto> GetUserMembershipAsync(int userId)
-        {
-            var membership = await _context.Memberships
-                .FirstOrDefaultAsync(m => m.UserId == userId);
-
-            if (membership == null) throw new ArgumentException("Membership not found");
-
-            return new MembershipDto
-            {
-                Id = membership.Id,
-                Type = membership.Type,
-                StartDate = membership.StartDate,
-                EndDate = membership.EndDate,
-                TotalHours = membership.TotalHours,
-                RemainingHours = membership.RemainingHours,
-                Status = membership.Status
-            };
-        }
-
-        public async Task<bool> CheckMembershipValidityAsync(int userId)
-        {
-            var membership = await _context.Memberships
-                .FirstOrDefaultAsync(m => m.UserId == userId);
-
-            if (membership == null) return false;
-            if (membership.Status != "Active") return false;
-            if (membership.EndDate < DateTime.UtcNow.Date)
-            {
-                membership.Status = "Expired";
-                await _context.SaveChangesAsync();
-                return false;
-            }
-
-            return true;
-        }
-
-        public async Task<bool> ExtendMembershipAsync(int membershipId, int additionalMonths)
-        {
-            var membership = await _context.Memberships.FindAsync(membershipId);
-            if (membership == null) throw new ArgumentException("Membership not found");
-
-            membership.EndDate = membership.EndDate.AddMonths(additionalMonths);
-            _context.Memberships.Update(membership);
-
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<bool> UpgradeMembershipAsync(int membershipId, string newType)
-        {
-            var membership = await _context.Memberships.FindAsync(membershipId);
-            if (membership == null) throw new ArgumentException("Membership not found");
-
-            // FIX THIS PART - use decimal for hours
-            decimal totalHours = newType switch
-            {
-                "Basic" => 10.0m,
-                "Medium" => 25.0m,
-                "VIP" => 50.0m,
-                _ => throw new ArgumentException("Invalid membership type")
-            };
-
-            // Calculate prorated hours - use decimal for all calculations
-            decimal daysUsed = (decimal)(DateTime.UtcNow - membership.StartDate).TotalDays;
-            decimal totalDays = (decimal)(membership.EndDate - membership.StartDate).TotalDays;
-            decimal hoursUsed = membership.TotalHours - membership.RemainingHours;
-            decimal hoursPerDay = membership.TotalHours / totalDays;
-            decimal hoursToDeduct = hoursPerDay * daysUsed;
-
-            decimal newRemainingHours = totalHours - hoursToDeduct;
-            if (newRemainingHours < 0) newRemainingHours = 0;
-
-            membership.Type = newType;
-            membership.TotalHours = totalHours;
-            membership.RemainingHours = newRemainingHours;
-
-            _context.Memberships.Update(membership);
-            return await _context.SaveChangesAsync() > 0;
-        }
-    }
-}
-// Services/MembershipTypeService.cs
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace elite.Services
-{
-    public class MembershipTypeService : IMembershipTypeService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<MembershipTypeService> _logger;
-
-        public MembershipTypeService(GymDbContext context, ILogger<MembershipTypeService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<IEnumerable<MembershipTypeDto>> GetAllMembershipTypesAsync()
-        {
-            return await _context.MembershipTypes
-                .Where(mt => mt.IsActive)
-                .Select(mt => new MembershipTypeDto
-                {
-                    Id = mt.Id,
-                    Name = mt.Name,
-                    Description = mt.Description,
-                    DurationMonths = mt.DurationMonths,
-                    TotalHours = mt.TotalHours,
-                    Price = mt.Price,
-                    IsActive = mt.IsActive
-                })
-                .ToListAsync();
-        }
-
-        public async Task<MembershipTypeDto> GetMembershipTypeByIdAsync(int id)
-        {
-            var membershipType = await _context.MembershipTypes.FindAsync(id);
-            if (membershipType == null) throw new ArgumentException("Membership type not found");
-
-            return new MembershipTypeDto
-            {
-                Id = membershipType.Id,
-                Name = membershipType.Name,
-                Description = membershipType.Description,
-                DurationMonths = membershipType.DurationMonths,
-                TotalHours = membershipType.TotalHours,
-                Price = membershipType.Price,
-                IsActive = membershipType.IsActive
-            };
-        }
-
-        public async Task<MembershipTypeDto> CreateMembershipTypeAsync(MembershipTypeCreateDto createDto)
-        {
-            if (await _context.MembershipTypes.AnyAsync(mt => mt.Name == createDto.Name))
-                throw new ArgumentException("Membership type with this name already exists");
-
-            var membershipType = new MembershipType
-            {
-                Name = createDto.Name,
-                Description = createDto.Description,
-                DurationMonths = createDto.DurationMonths,
-                TotalHours = createDto.TotalHours,
-                Price = createDto.Price,
-                IsActive = true
-            };
-
-            _context.MembershipTypes.Add(membershipType);
-            await _context.SaveChangesAsync();
-
-            return new MembershipTypeDto
-            {
-                Id = membershipType.Id,
-                Name = membershipType.Name,
-                Description = membershipType.Description,
-                DurationMonths = membershipType.DurationMonths,
-                TotalHours = membershipType.TotalHours,
-                Price = membershipType.Price,
-                IsActive = membershipType.IsActive
-            };
-        }
-
-        public async Task<MembershipTypeDto> UpdateMembershipTypeAsync(int id, MembershipTypeCreateDto updateDto)
-        {
-            var membershipType = await _context.MembershipTypes.FindAsync(id);
-            if (membershipType == null) throw new ArgumentException("Membership type not found");
-
-            // Check if name is being changed and if it conflicts with another type
-            if (membershipType.Name != updateDto.Name &&
-                await _context.MembershipTypes.AnyAsync(mt => mt.Name == updateDto.Name))
-                throw new ArgumentException("Membership type with this name already exists");
-
-            membershipType.Name = updateDto.Name;
-            membershipType.Description = updateDto.Description;
-            membershipType.DurationMonths = updateDto.DurationMonths;
-            membershipType.TotalHours = updateDto.TotalHours;
-            membershipType.Price = updateDto.Price;
-
-            _context.MembershipTypes.Update(membershipType);
-            await _context.SaveChangesAsync();
-
-            return new MembershipTypeDto
-            {
-                Id = membershipType.Id,
-                Name = membershipType.Name,
-                Description = membershipType.Description,
-                DurationMonths = membershipType.DurationMonths,
-                TotalHours = membershipType.TotalHours,
-                Price = membershipType.Price,
-                IsActive = membershipType.IsActive
-            };
-        }
-
-        public async Task<bool> DeleteMembershipTypeAsync(int id)
-        {
-            var membershipType = await _context.MembershipTypes.FindAsync(id);
-            if (membershipType == null) throw new ArgumentException("Membership type not found");
-
-            // Check if this membership type is being used by any active memberships
-            var hasActiveMemberships = await _context.Memberships
-                .AnyAsync(m => m.Type == membershipType.Name && m.Status == "Active");
-
-            if (hasActiveMemberships)
-                throw new InvalidOperationException("Cannot delete membership type with active memberships");
-
-            _context.MembershipTypes.Remove(membershipType);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<bool> ToggleMembershipTypeStatusAsync(int id, bool isActive)
-        {
-            var membershipType = await _context.MembershipTypes.FindAsync(id);
-            if (membershipType == null) throw new ArgumentException("Membership type not found");
-
-            membershipType.IsActive = isActive;
-            _context.MembershipTypes.Update(membershipType);
-            return await _context.SaveChangesAsync() > 0;
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    // Services/OnlineSessionService.cs
-    public class OnlineSessionService : IOnlineSessionService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<OnlineSessionService> _logger;
-
-        public OnlineSessionService(GymDbContext context, ILogger<OnlineSessionService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<IEnumerable<OnlineSessionDto>> GetAllSessionsAsync()
-        {
-            return await _context.OnlineSessions
-                .Include(os => os.Trainer)
-                .Select(os => new OnlineSessionDto
-                {
-                    Id = os.Id,
-                    Name = os.Name,
-                    Description = os.Description,
-                    Duration = os.Duration,
-                    TrainerId = os.TrainerId,
-                    TrainerName = os.Trainer.Name,
-                    Price = os.Price
-                })
-                .ToListAsync();
-        }
-
-        public async Task<OnlineSessionDto> GetSessionByIdAsync(int id)
-        {
-            var session = await _context.OnlineSessions
-                .Include(os => os.Trainer)
-                .FirstOrDefaultAsync(os => os.Id == id);
-
-            if (session == null) throw new ArgumentException("Online session not found");
-
-            return new OnlineSessionDto
-            {
-                Id = session.Id,
-                Name = session.Name,
-                Description = session.Description,
-                Duration = session.Duration,
-                TrainerId = session.TrainerId,
-                TrainerName = session.Trainer.Name,
-                Price = session.Price
-            };
-        }
-
-        public async Task<OnlineSessionDto> CreateSessionAsync(OnlineSessionCreateDto sessionCreateDto)
-        {
-            // Check if trainer exists
-            var trainer = await _context.Trainers.FindAsync(sessionCreateDto.TrainerId);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            var session = new OnlineSession
-            {
-                Name = sessionCreateDto.Name,
-                Description = sessionCreateDto.Description,
-                Duration = sessionCreateDto.Duration,
-                TrainerId = sessionCreateDto.TrainerId,
-                Price = sessionCreateDto.Price
-            };
-
-            _context.OnlineSessions.Add(session);
-            await _context.SaveChangesAsync();
-
-            return new OnlineSessionDto
-            {
-                Id = session.Id,
-                Name = session.Name,
-                Description = session.Description,
-                Duration = session.Duration,
-                TrainerId = session.TrainerId,
-                TrainerName = trainer.Name,
-                Price = session.Price
-            };
-        }
-
-        public async Task<OnlineSessionDto> UpdateSessionAsync(int id, OnlineSessionCreateDto sessionUpdateDto)
-        {
-            var session = await _context.OnlineSessions.FindAsync(id);
-            if (session == null) throw new ArgumentException("Online session not found");
-
-            // Check if trainer exists
-            var trainer = await _context.Trainers.FindAsync(sessionUpdateDto.TrainerId);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            session.Name = sessionUpdateDto.Name;
-            session.Description = sessionUpdateDto.Description;
-            session.Duration = sessionUpdateDto.Duration;
-            session.TrainerId = sessionUpdateDto.TrainerId;
-            session.Price = sessionUpdateDto.Price;
-
-            _context.OnlineSessions.Update(session);
-            await _context.SaveChangesAsync();
-
-            return new OnlineSessionDto
-            {
-                Id = session.Id,
-                Name = session.Name,
-                Description = session.Description,
-                Duration = session.Duration,
-                TrainerId = session.TrainerId,
-                TrainerName = trainer.Name,
-                Price = session.Price
-            };
-        }
-
-        public async Task<bool> DeleteSessionAsync(int id)
-        {
-            var session = await _context.OnlineSessions.FindAsync(id);
-            if (session == null) throw new ArgumentException("Online session not found");
-
-            // Check if session has any schedules
-            var hasSchedules = await _context.OnlineSessionSchedules.AnyAsync(oss => oss.OnlineSessionId == id);
-            if (hasSchedules) throw new InvalidOperationException("Cannot delete session with existing schedules");
-
-            _context.OnlineSessions.Remove(session);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<OnlineSessionScheduleDto>> GetSessionSchedulesAsync(int sessionId)
-        {
-            return await _context.OnlineSessionSchedules
-                .Where(oss => oss.OnlineSessionId == sessionId)
-                .Include(oss => oss.OnlineSession)
-                .Select(oss => new OnlineSessionScheduleDto
-                {
-                    Id = oss.Id,
-                    OnlineSessionId = oss.OnlineSessionId,
-                    SessionName = oss.OnlineSession.Name,
-                    StartTime = oss.StartTime,
-                    EndTime = oss.EndTime,
-                    AvailableSlots = oss.AvailableSlots,
-                    MaxSlots = 20 // Fixed maximum for online sessions
-                })
-                .ToListAsync();
-        }
-
-        public async Task<OnlineSessionScheduleDto> CreateSessionScheduleAsync(OnlineSessionScheduleCreateDto scheduleCreateDto)
-        {
-            var session = await _context.OnlineSessions.FindAsync(scheduleCreateDto.OnlineSessionId);
-            if (session == null) throw new ArgumentException("Online session not found");
-
-            // Check if the schedule overlaps with existing schedules for the same trainer
-            var overlappingSchedule = await _context.OnlineSessionSchedules
-                .Where(oss => oss.OnlineSession.TrainerId == session.TrainerId)
-                .Where(oss => oss.StartTime < scheduleCreateDto.EndTime && oss.EndTime > scheduleCreateDto.StartTime)
-                .FirstOrDefaultAsync();
-
-            if (overlappingSchedule != null)
-                throw new InvalidOperationException("Schedule overlaps with existing session for this trainer");
-
-            var schedule = new OnlineSessionSchedule
-            {
-                OnlineSessionId = scheduleCreateDto.OnlineSessionId,
-                StartTime = scheduleCreateDto.StartTime,
-                EndTime = scheduleCreateDto.EndTime,
-                AvailableSlots = scheduleCreateDto.AvailableSlots
-            };
-
-            _context.OnlineSessionSchedules.Add(schedule);
-            await _context.SaveChangesAsync();
-
-            return new OnlineSessionScheduleDto
-            {
-                Id = schedule.Id,
-                OnlineSessionId = schedule.OnlineSessionId,
-                SessionName = session.Name,
-                StartTime = schedule.StartTime,
-                EndTime = schedule.EndTime,
-                AvailableSlots = schedule.AvailableSlots,
-                MaxSlots = 20
-            };
-        }
-
-        public async Task<bool> DeleteSessionScheduleAsync(int scheduleId)
-        {
-            var schedule = await _context.OnlineSessionSchedules.FindAsync(scheduleId);
-            if (schedule == null) throw new ArgumentException("Online session schedule not found");
-
-            // Check if schedule has any bookings
-            var hasBookings = await _context.Bookings.AnyAsync(b => b.ScheduleId == scheduleId && b.Type == "OnlineSession");
-            if (hasBookings) throw new InvalidOperationException("Cannot delete schedule with existing bookings");
-
-            _context.OnlineSessionSchedules.Remove(schedule);
-            return await _context.SaveChangesAsync() > 0;
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    // Services/OrderService.cs
-    public class OrderService : IOrderService
-    {
-        private readonly GymDbContext _context;
-        private readonly IPromotionService _promotionService;
-        private readonly ILogger<OrderService> _logger;
-
-        public OrderService(GymDbContext context, IPromotionService promotionService, ILogger<OrderService> logger)
-        {
-            _context = context;
-            _promotionService = promotionService;
-            _logger = logger;
-        }
-
-        public async Task<OrderDto> CreateOrderAsync(OrderCreateDto orderCreateDto)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var user = await _context.Users.FindAsync(orderCreateDto.UserId);
-                if (user == null) throw new ArgumentException("User not found");
-
-                decimal totalAmount = 0;
-                var orderItems = new List<OrderItem>();
-
-                foreach (var item in orderCreateDto.Items)
-                {
-                    var product = await _context.Products.FindAsync(item.ProductId);
-                    if (product == null) throw new ArgumentException($"Product with ID {item.ProductId} not found");
-
-                    if (product.StockQuantity < item.Quantity)
-                        throw new InvalidOperationException($"Insufficient stock for product: {product.Name}");
-
-                    var orderItem = new OrderItem
-                    {
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        Price = product.Price
-                    };
-
-                    totalAmount += product.Price * item.Quantity;
-                    orderItems.Add(orderItem);
-
-                    // Update product stock
-                    product.StockQuantity -= item.Quantity;
-                    _context.Products.Update(product);
-                }
-
-                // Apply promotion if provided
-                decimal discount = 0;
-                if (!string.IsNullOrEmpty(orderCreateDto.PromotionCode))
-                {
-                    try
-                    {
-                        discount = await _promotionService.CalculateDiscountAsync(orderCreateDto.PromotionCode, totalAmount);
-                        totalAmount -= discount;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to apply promotion code: {Code}", orderCreateDto.PromotionCode);
-                    }
-                }
-
-                var order = new Order
-                {
-                    UserId = orderCreateDto.UserId,
-                    OrderDate = DateTime.UtcNow,
-                    TotalAmount = totalAmount,
-                    Status = "Completed"
-                };
-
-                _context.Orders.Add(order);
-                await _context.SaveChangesAsync();
-
-                // Add order items with order ID
-                foreach (var item in orderItems)
-                {
-                    item.OrderId = order.Id;
-                    _context.OrderItems.Add(item);
-                }
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return await GetOrderByIdAsync(order.Id);
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error creating order");
-                throw;
-            }
-        }
-
-        public async Task<OrderDto> GetOrderByIdAsync(int id)
-        {
-            var order = await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-                .FirstOrDefaultAsync(o => o.Id == id);
-
-            if (order == null) throw new ArgumentException("Order not found");
-
-            return new OrderDto
-            {
-                Id = order.Id,
-                UserId = order.UserId,
-                UserName = order.User.Name,
-                OrderDate = order.OrderDate,
-                TotalAmount = order.TotalAmount,
-                Status = order.Status,
-                OrderItems = order.OrderItems.Select(oi => new OrderItemDto
-                {
-                    Id = oi.Id,
-                    ProductId = oi.ProductId,
-                    ProductName = oi.Product.Name,
-                    Quantity = oi.Quantity,
-                    Price = oi.Price
-                }).ToList()
-            };
-        }
-
-        public async Task<IEnumerable<OrderDto>> GetUserOrdersAsync(int userId)
-        {
-            return await _context.Orders
-                .Where(o => o.UserId == userId)
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .Select(o => new OrderDto
-                {
-                    Id = o.Id,
-                    UserId = o.UserId,
-                    UserName = o.User.Name,
-                    OrderDate = o.OrderDate,
-                    TotalAmount = o.TotalAmount,
-                    Status = o.Status,
-                    OrderItems = o.OrderItems.Select(oi => new OrderItemDto
-                    {
-                        Id = oi.Id,
-                        ProductId = oi.ProductId,
-                        ProductName = oi.Product.Name,
-                        Quantity = oi.Quantity,
-                        Price = oi.Price
-                    }).ToList()
-                })
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<OrderDto>> GetAllOrdersAsync()
-        {
-            return await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product)
-                .OrderByDescending(o => o.OrderDate)
-                .Select(o => new OrderDto
-                {
-                    Id = o.Id,
-                    UserId = o.UserId,
-                    UserName = o.User.Name,
-                    OrderDate = o.OrderDate,
-                    TotalAmount = o.TotalAmount,
-                    Status = o.Status,
-                    OrderItems = o.OrderItems.Select(oi => new OrderItemDto
-                    {
-                        Id = oi.Id,
-                        ProductId = oi.ProductId,
-                        ProductName = oi.Product.Name,
-                        Quantity = oi.Quantity,
-                        Price = oi.Price
-                    }).ToList()
-                })
-                .ToListAsync();
-        }
-
-        public async Task<bool> UpdateOrderStatusAsync(int id, string status)
-        {
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null) throw new ArgumentException("Order not found");
-
-            order.Status = status;
-            _context.Orders.Update(order);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<bool> CancelOrderAsync(int id)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-
-            try
-            {
-                var order = await _context.Orders
-                    .Include(o => o.OrderItems)
-                    .FirstOrDefaultAsync(o => o.Id == id);
-
-                if (order == null) throw new ArgumentException("Order not found");
-
-                // Restore product stock
-                foreach (var item in order.OrderItems)
-                {
-                    var product = await _context.Products.FindAsync(item.ProductId);
-                    if (product != null)
-                    {
-                        product.StockQuantity += item.Quantity;
-                        _context.Products.Update(product);
-                    }
-                }
-
-                order.Status = "Cancelled";
-                _context.Orders.Update(order);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error cancelling order");
-                throw;
-            }
-        }
-
-        public async Task<decimal> ApplyPromotionAsync(string code, decimal orderAmount)
-        {
-            return await _promotionService.CalculateDiscountAsync(code, orderAmount);
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    // Services/ProductService.cs
-    public class ProductService : IProductService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<ProductService> _logger;
-        private readonly IImageService _imageService;
-
-        public ProductService(GymDbContext context, ILogger<ProductService> logger, IImageService imageService)
-        {
-            _context = context;
-            _logger = logger;
-            _imageService = imageService;
-        }
-
-        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
-        {
-            return await _context.Products
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    ImageUrl = p.ImageUrl,
-                    Category = p.Category,
-                    StockQuantity = p.StockQuantity
-                })
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(string category)
-        {
-            return await _context.Products
-                .Where(p => p.Category == category)
-                .Select(p => new ProductDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Description = p.Description,
-                    Price = p.Price,
-                    ImageUrl = p.ImageUrl,
-                    Category = p.Category,
-                    StockQuantity = p.StockQuantity
-                })
-                .ToListAsync();
-        }
-
-        public async Task<ProductDto> GetProductByIdAsync(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) throw new ArgumentException("Product not found");
-
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                ImageUrl = product.ImageUrl,
-                Category = product.Category,
-                StockQuantity = product.StockQuantity
-            };
-        }
-
-        public async Task<ProductDto> CreateProductAsync(ProductCreateDto productCreateDto)
-        {
-            string imageUrl = null;
-
-            // Handle image upload if provided
-            if (productCreateDto.ImageFile != null)
-            {
-                imageUrl = await _imageService.UploadImageAsync(productCreateDto.ImageFile, "products");
-            }
-
-            var product = new Product
-            {
-                Name = productCreateDto.Name,
-                Description = productCreateDto.Description,
-                Price = productCreateDto.Price,
-                ImageUrl = imageUrl, // Use the uploaded image URL
-                Category = productCreateDto.Category,
-                StockQuantity = productCreateDto.StockQuantity
-            };
-
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                ImageUrl = product.ImageUrl,
-                Category = product.Category,
-                StockQuantity = product.StockQuantity
-            };
-        }
-
-        public async Task<ProductDto> UpdateProductAsync(int id, ProductUpdateDto productUpdateDto)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) throw new ArgumentException("Product not found");
-
-            // Handle image update ONLY if a new image is provided
-            if (productUpdateDto.ImageFile != null && productUpdateDto.ImageFile.Length > 0)
-            {
-                try
-                {
-                    // Delete old image if exists
-                    if (!string.IsNullOrEmpty(product.ImageUrl))
-                    {
-                        _imageService.DeleteImage(product.ImageUrl);
-                    }
-
-                    // Upload new image
-                    product.ImageUrl = await _imageService.UploadImageAsync(productUpdateDto.ImageFile, "products");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error updating image for product");
-                    // Keep existing image if upload fails
-                }
-            }
-            // If no new image is provided, keep the existing image URL
-
-            // Update other properties
-            product.Name = productUpdateDto.Name;
-            product.Description = productUpdateDto.Description;
-            product.Price = productUpdateDto.Price;
-            product.Category = productUpdateDto.Category;
-            product.StockQuantity = productUpdateDto.StockQuantity;
-
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-
-            return new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                ImageUrl = product.ImageUrl,
-                Category = product.Category,
-                StockQuantity = product.StockQuantity
-            };
-        }
-
-        public async Task<bool> DeleteProductAsync(int id)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) throw new ArgumentException("Product not found");
-
-            _context.Products.Remove(product);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        // Services/ProductService.cs
-        public async Task<bool> UpdateProductStockAsync(int id, int quantity)
-        {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) throw new ArgumentException("Product not found");
-
-            product.StockQuantity = quantity;
-            _context.Products.Update(product);
-            return await _context.SaveChangesAsync() > 0;
-        }
-    }
-}
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    // Services/PromotionService.cs
-    public class PromotionService : IPromotionService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<PromotionService> _logger;
-
-        public PromotionService(GymDbContext context, ILogger<PromotionService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<IEnumerable<PromotionDto>> GetAllPromotionsAsync()
-        {
-            return await _context.Promotions
-                .Select(p => new PromotionDto
-                {
-                    Id = p.Id,
-                    Code = p.Code,
-                    Description = p.Description,
-                    DiscountType = p.DiscountType,
-                    DiscountValue = p.DiscountValue,
-                    StartDate = p.StartDate,
-                    EndDate = p.EndDate,
-                    UsageLimit = p.UsageLimit,
-                    TimesUsed = p.TimesUsed
-                })
-                .ToListAsync();
-        }
-
-        public async Task<PromotionDto> GetPromotionByIdAsync(int id)
-        {
-            var promotion = await _context.Promotions.FindAsync(id);
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-
-            return new PromotionDto
-            {
-                Id = promotion.Id,
-                Code = promotion.Code,
-                Description = promotion.Description,
-                DiscountType = promotion.DiscountType,
-                DiscountValue = promotion.DiscountValue,
-                StartDate = promotion.StartDate,
-                EndDate = promotion.EndDate,
-                UsageLimit = promotion.UsageLimit,
-                TimesUsed = promotion.TimesUsed
-            };
-        }
-
-        public async Task<PromotionDto> GetPromotionByCodeAsync(string code)
-        {
-            var promotion = await _context.Promotions
-                .FirstOrDefaultAsync(p => p.Code == code);
-
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-
-            return new PromotionDto
-            {
-                Id = promotion.Id,
-                Code = promotion.Code,
-                Description = promotion.Description,
-                DiscountType = promotion.DiscountType,
-                DiscountValue = promotion.DiscountValue,
-                StartDate = promotion.StartDate,
-                EndDate = promotion.EndDate,
-                UsageLimit = promotion.UsageLimit,
-                TimesUsed = promotion.TimesUsed
-            };
-        }
-
-        public async Task<PromotionDto> CreatePromotionAsync(PromotionCreateDto promotionCreateDto)
-        {
-            if (await _context.Promotions.AnyAsync(p => p.Code == promotionCreateDto.Code))
-                throw new ArgumentException("Promotion code already exists");
-
-            var promotion = new Promotion
-            {
-                Code = promotionCreateDto.Code,
-                Description = promotionCreateDto.Description,
-                DiscountType = promotionCreateDto.DiscountType,
-                DiscountValue = promotionCreateDto.DiscountValue,
-                StartDate = promotionCreateDto.StartDate,
-                EndDate = promotionCreateDto.EndDate,
-                UsageLimit = promotionCreateDto.UsageLimit,
-                TimesUsed = 0
-            };
-
-            _context.Promotions.Add(promotion);
-            await _context.SaveChangesAsync();
-
-            return new PromotionDto
-            {
-                Id = promotion.Id,
-                Code = promotion.Code,
-                Description = promotion.Description,
-                DiscountType = promotion.DiscountType,
-                DiscountValue = promotion.DiscountValue,
-                StartDate = promotion.StartDate,
-                EndDate = promotion.EndDate,
-                UsageLimit = promotion.UsageLimit,
-                TimesUsed = promotion.TimesUsed
-            };
-        }
-
-        public async Task<PromotionDto> UpdatePromotionAsync(int id, PromotionCreateDto promotionUpdateDto)
-        {
-            var promotion = await _context.Promotions.FindAsync(id);
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-
-            // Check if code is being changed and if it already exists
-            if (promotion.Code != promotionUpdateDto.Code &&
-                await _context.Promotions.AnyAsync(p => p.Code == promotionUpdateDto.Code && p.Id != id))
-                throw new ArgumentException("Promotion code already exists");
-
-            promotion.Code = promotionUpdateDto.Code;
-            promotion.Description = promotionUpdateDto.Description;
-            promotion.DiscountType = promotionUpdateDto.DiscountType;
-            promotion.DiscountValue = promotionUpdateDto.DiscountValue;
-            promotion.StartDate = promotionUpdateDto.StartDate;
-            promotion.EndDate = promotionUpdateDto.EndDate;
-            promotion.UsageLimit = promotionUpdateDto.UsageLimit;
-
-            _context.Promotions.Update(promotion);
-            await _context.SaveChangesAsync();
-
-            return new PromotionDto
-            {
-                Id = promotion.Id,
-                Code = promotion.Code,
-                Description = promotion.Description,
-                DiscountType = promotion.DiscountType,
-                DiscountValue = promotion.DiscountValue,
-                StartDate = promotion.StartDate,
-                EndDate = promotion.EndDate,
-                UsageLimit = promotion.UsageLimit,
-                TimesUsed = promotion.TimesUsed
-            };
-        }
-
-        public async Task<bool> DeletePromotionAsync(int id)
-        {
-            var promotion = await _context.Promotions.FindAsync(id);
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-
-            _context.Promotions.Remove(promotion);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<bool> ValidatePromotionAsync(string code, decimal orderAmount)
-        {
-            var promotion = await _context.Promotions
-                .FirstOrDefaultAsync(p => p.Code == code);
-
-            if (promotion == null) return false;
-            if (DateTime.UtcNow < promotion.StartDate || DateTime.UtcNow > promotion.EndDate) return false;
-            if (promotion.UsageLimit > 0 && promotion.TimesUsed >= promotion.UsageLimit) return false;
-
-            return true;
-        }
-
-        public async Task<decimal> CalculateDiscountAsync(string code, decimal orderAmount)
-        {
-            var promotion = await _context.Promotions
-                .FirstOrDefaultAsync(p => p.Code == code);
-
-            if (promotion == null) throw new ArgumentException("Promotion not found");
-            if (!await ValidatePromotionAsync(code, orderAmount))
-                throw new InvalidOperationException("Promotion is not valid");
-
-            decimal discount = 0;
-            if (promotion.DiscountType == "Percentage")
-            {
-                discount = orderAmount * (promotion.DiscountValue / 100);
-            }
-            else if (promotion.DiscountType == "Fixed")
-            {
-                discount = promotion.DiscountValue;
-            }
-
-            // Update usage count
-            promotion.TimesUsed++;
-            _context.Promotions.Update(promotion);
-            await _context.SaveChangesAsync();
-
-            return discount;
-        }
-    }
-}
-// Services/TrainerService.cs
-using elite.Data;
-using elite.DTOs;
-using elite.Interfaces;
-using elite.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace elite.Services
-{
-    public class TrainerService : ITrainerService
-    {
-        private readonly GymDbContext _context;
-        private readonly ILogger<TrainerService> _logger;
-        private readonly IImageService _imageService;
-
-        public TrainerService(GymDbContext context, ILogger<TrainerService> logger, IImageService imageService)
-        {
-            _context = context;
-            _logger = logger;
-            _imageService = imageService;
-        }
-
-        public async Task<IEnumerable<TrainerDto>> GetAllTrainersAsync()
-        {
-            return await _context.Trainers
-                .Select(t => new TrainerDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Specialization = t.Specialization,
-                    ExperienceYears = t.ExperienceYears,
-                    Certifications = t.Certifications,
-                    Bio = t.Bio,
-                    ImageUrl = t.ImageUrl
-                })
-                .ToListAsync();
-        }
-
-        public async Task<TrainerDto> GetTrainerByIdAsync(int id)
-        {
-            var trainer = await _context.Trainers.FindAsync(id);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            return new TrainerDto
-            {
-                Id = trainer.Id,
-                Name = trainer.Name,
-                Specialization = trainer.Specialization,
-                ExperienceYears = trainer.ExperienceYears,
-                Certifications = trainer.Certifications,
-                Bio = trainer.Bio,
-                ImageUrl = trainer.ImageUrl
-            };
-        }
-
-        public async Task<TrainerDto> CreateTrainerAsync(TrainerCreateDto trainerCreateDto)
-        {
-            try
-            {
-                string imageUrl = null;
-
-                if (trainerCreateDto.ImageFile != null)
-                {
-                    try
-                    {
-                        imageUrl = await _imageService.UploadImageAsync(trainerCreateDto.ImageFile, "trainers");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error uploading image for trainer");
-                        // Continue without image if upload fails
-                    }
-                }
-
-                var trainer = new Trainer
-                {
-                    Name = trainerCreateDto.Name,
-                    Specialization = trainerCreateDto.Specialization,
-                    ExperienceYears = trainerCreateDto.ExperienceYears,
-                    Certifications = trainerCreateDto.Certifications,
-                    Bio = trainerCreateDto.Bio,
-                    ImageUrl = imageUrl
-                };
-
-                _context.Trainers.Add(trainer);
-                await _context.SaveChangesAsync();
-
-                return new TrainerDto
-                {
-                    Id = trainer.Id,
-                    Name = trainer.Name,
-                    Specialization = trainer.Specialization,
-                    ExperienceYears = trainer.ExperienceYears,
-                    Certifications = trainer.Certifications,
-                    Bio = trainer.Bio,
-                    ImageUrl = trainer.ImageUrl
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating trainer");
-                throw;
-            }
-        }
-
-        // Updated method with TrainerUpdateDto
-        public async Task<TrainerDto> UpdateTrainerAsync(int id, TrainerUpdateDto trainerUpdateDto)
-        {
-            try
-            {
-                var trainer = await _context.Trainers.FindAsync(id);
-                if (trainer == null) throw new ArgumentException("Trainer not found");
-
-                // Handle image update ONLY if a new image is provided
-                if (trainerUpdateDto.ImageFile != null && trainerUpdateDto.ImageFile.Length > 0)
-                {
-                    try
-                    {
-                        // Delete old image if exists
-                        if (!string.IsNullOrEmpty(trainer.ImageUrl))
-                        {
-                            _imageService.DeleteImage(trainer.ImageUrl);
-                        }
-
-                        // Upload new image
-                        trainer.ImageUrl = await _imageService.UploadImageAsync(trainerUpdateDto.ImageFile, "trainers");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error updating image for trainer");
-                        // Keep existing image if upload fails
-                    }
-                }
-                // If no new image is provided, keep the existing image URL
-
-                // Update other properties
-                trainer.Name = trainerUpdateDto.Name;
-                trainer.Specialization = trainerUpdateDto.Specialization;
-                trainer.ExperienceYears = trainerUpdateDto.ExperienceYears;
-                trainer.Certifications = trainerUpdateDto.Certifications;
-                trainer.Bio = trainerUpdateDto.Bio;
-
-                await _context.SaveChangesAsync();
-
-                return new TrainerDto
-                {
-                    Id = trainer.Id,
-                    Name = trainer.Name,
-                    Specialization = trainer.Specialization,
-                    ExperienceYears = trainer.ExperienceYears,
-                    Certifications = trainer.Certifications,
-                    Bio = trainer.Bio,
-                    ImageUrl = trainer.ImageUrl
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating trainer");
-                throw;
-            }
-        }
-
-        public async Task<bool> DeleteTrainerAsync(int id)
-        {
-            var trainer = await _context.Trainers.FindAsync(id);
-            if (trainer == null) throw new ArgumentException("Trainer not found");
-
-            // Delete associated image
-            if (!string.IsNullOrEmpty(trainer.ImageUrl))
-            {
-                _imageService.DeleteImage(trainer.ImageUrl);
-            }
-
-            _context.Trainers.Remove(trainer);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<ClassDto>> GetTrainerClassesAsync(int trainerId)
-        {
-            return await _context.Classes
-                .Where(c => c.TrainerId == trainerId)
-                .Select(c => new ClassDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description,
-                    Duration = c.Duration,
-                    TrainerId = c.TrainerId,
-                    TrainerName = c.Trainer.Name,
-                    MaxCapacity = c.MaxCapacity,
-                    Price = c.Price
-                })
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<OnlineSessionDto>> GetTrainerSessionsAsync(int trainerId)
-        {
-            return await _context.OnlineSessions
-                .Where(os => os.TrainerId == trainerId)
-                .Select(os => new OnlineSessionDto
-                {
-                    Id = os.Id,
-                    Name = os.Name,
-                    Description = os.Description,
-                    Duration = os.Duration,
-                    TrainerId = os.TrainerId,
-                    TrainerName = os.Trainer.Name,
-                    Price = os.Price
-                })
-                .ToListAsync();
-        }
-    }
-}
 using elite.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -5487,28 +1482,8 @@ namespace elite.Utilities
         }
     }
 }
-namespace elite.Utilities
-{
-    // Utilities/PasswordHasher.cs
-    public interface IPasswordHasher
-    {
-        string HashPassword(string password);
-        bool VerifyPassword(string hashedPassword, string providedPassword);
-    }
 
-    public class PasswordHasher : IPasswordHasher
-    {
-        public string HashPassword(string password)
-        {
-            return BCrypt.Net.BCrypt.HashPassword(password);
-        }
 
-        public bool VerifyPassword(string hashedPassword, string providedPassword)
-        {
-            return BCrypt.Net.BCrypt.Verify(providedPassword, hashedPassword);
-        }
-    }
-}
 using elite.Data;
 using elite.Interfaces;
 using elite.Middleware;
@@ -5708,24 +1683,839 @@ using (var scope = app.Services.CreateScope())
 
 app.MapControllers();
 
-app.Run();
+app.Run();  
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Elite Gym</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #5E60CE;      /* Modern Indigo */
+            --secondary-color: #5390D9;    /* Lighter Blue */
+            --accent-color: #48BFE3;       /* Teal Accent */
+            --dark-color: #0B132B;         /* Deep Dark Blue */
+            --light-color: #F8F9FA;
+            --text-dark: #0B132B;
+            --text-light: #5E6472;
+            --card-bg: #ffffff;
+            --section-bg: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #5E60CE 0%, #5390D9 100%);
+            --gradient-2: linear-gradient(135deg, #48BFE3 0%, #5E60CE 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--section-bg);
+            overflow-x: hidden;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary-color) !important;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .navbar-nav .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+        
+        .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover:after, .navbar-nav .nav-link.active:after {
+            width: 70%;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        
+        /* Main Content */
+        .login-section {
+            padding: 80px 0;
+            min-height: calc(100vh - 300px);
+            display: flex;
+            align-items: center;
+        }
+        
+        .login-card {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: none;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: white;
+        }
+        
+        .login-header {
+            background: var(--gradient-1);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .login-header p {
+            opacity: 0.9;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-body {
+            padding: 40px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        
+        .input-group {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(94, 96, 206, 0.1);
+        }
+        
+        .input-group:focus-within {
+            box-shadow: 0 8px 25px rgba(94, 96, 206, 0.15);
+            border-color: var(--primary-color);
+        }
+        
+        .input-group-text {
+            background: var(--gradient-1);
+            border: none;
+            color: white;
+            font-weight: 500;
+            width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .form-control {
+            border: none;
+            padding: 15px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .form-control:focus {
+            box-shadow: none;
+        }
+        
+        .toggle-password {
+            background-color: transparent;
+            border: none;
+            color: var(--text-light);
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-login {
+            background: var(--gradient-2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
+            color: white;
+        }
+        
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+            color: var(--secondary-color);
+        }
+        
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background-color: rgba(94, 96, 206, 0.1);
+        }
+        
+        .divider span {
+            background-color: white;
+            padding: 0 15px;
+            position: relative;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .btn-social {
+            border-radius: 30px;
+            padding: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(94, 96, 206, 0.1);
+            color: var(--text-dark);
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-social:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-facebook {
+            color: #4267B2;
+        }
+        
+        .btn-facebook:hover {
+            background-color: #4267B2;
+            color: white;
+        }
+        
+        .btn-google {
+            color: #DB4437;
+        }
+        
+        .btn-google:hover {
+            background-color: #DB4437;
+            color: white;
+        }
+        
+        .register-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .register-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            border-left: 4px solid #198754;
+        }
+        
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-left: 4px solid #dc3545;
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 100%);
+            color: white;
+            padding: 70px 0 20px;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer-text {
+            margin-bottom: 20px;
+            color: #cccccc;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .social-icons a:hover {
+            background: var(--gradient-1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.4);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #cccccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+        
+        .contact-info i {
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #999999;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .page-header {
+                padding: 80px 0;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .login-section {
+                padding: 60px 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 60px 0;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .login-card {
+                margin: 0 20px;
+            }
+            
+            .login-header, .login-body {
+                padding: 25px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                font-size: 1.8rem;
+            }
+            
+            .login-header, .login-body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-lightning-charge-fill"></i> Elite Gym
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.html">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+ 
+    
+    <!-- Main Content -->
+    <main class="login-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card login-card">
+                        <div class="login-header">
+                            <h1>Welcome Back</h1>
+                            <p>Sign in to continue your fitness journey</p>
+                        </div>
+                        <div class="login-body">
+                            <!-- Alert Container -->
+                            <div id="alert-container"></div>
+                            
+                            <form id="login-form">
+                                <div class="mb-4">
+                                    <label for="email" class="form-label">Email address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">Remember me</label>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-login">Login</button>
+                                </div>
+                                
+                                <div class="text-center mt-3">
+                                    <a href="forgot-password.html" class="forgot-password">Forgot password?</a>
+                                </div>
+                            </form>
+                            
+                            <div class="text-center mt-4">
+                                <p>Don't have an account? <a href="register.html" class="register-link">Register here</a></p>
+                            </div>
+                            
+                            <div class="divider">
+                                <span>OR</span>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-social btn-facebook">
+                                    <i class="bi bi-facebook me-2"></i> Login with Facebook
+                                </button>
+                                <button class="btn btn-social btn-google">
+                                    <i class="bi bi-google me-2"></i> Login with Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="footer-title">Elite Gym</h5>
+                    <p class="footer-text">Empowering women through fitness and wellness.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a href="classes.html">Classes</a></li>
+                        <li><a href="sessions.html">Online Sessions</a></li>
+                        <li><a href="trainers.html">Trainers</a></li>
+                        <li><a href="pricing.html">Membership Plans</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="footer-title">Contact Us</h5>
+                    <div class="contact-info">
+                        <p><i class="bi bi-geo-alt"></i> 123 Fitness Street, Health City, HC 12345</p>
+                        <p><i class="bi bi-telephone"></i> (123) 456-7890</p>
+                        <p><i class="bi bi-envelope"></i> info@elitegym.com</p>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Elite Gym. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePassword = document.querySelector('.toggle-password');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle icon
+                const icon = this.querySelector('i');
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            });
+            
+            // Handle form submission
+            const loginForm = document.getElementById('login-form');
+            
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Validate form
+                let isValid = true;
+                
+                // Validate email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    document.getElementById('email').classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    document.getElementById('email').classList.remove('is-invalid');
+                }
+                
+                // Validate password
+                if (password.length < 6) {
+                    document.getElementById('password').classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    document.getElementById('password').classList.remove('is-invalid');
+                }
+                
+                if (!isValid) {
+                    return;
+                }
+                
+                // Show loading
+                const submitBtn = loginForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...';
+                submitBtn.disabled = true;
+                
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Show success message
+                    const alertContainer = document.getElementById('alert-container');
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Login successful! Redirecting...
+                        </div>
+                    `;
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                    
+                } catch (error) {
+                    // Show error message
+                    const alertContainer = document.getElementById('alert-container');
+                    alertContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Login failed. Please check your credentials.
+                        </div>
+                    `;
+                    
+                    // Reset button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+POST
+/api/Auth/login
+
+
+Parameters
+Cancel
+Reset
+No parameters
+
+Request body
+
+application/json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.\\SQLEXPRESS;Database=GYMBookingDB;Trusted_Connection=True;TrustServerCertificate=True;"
-  },
-  "Jwt": {
-    "Secret": "YourSuperSecretKeyHereAtLeast32CharactersLong",
-    "Issuer": "GymBookingAPI",
-    "Audience": "GymBookingClients",
-    "ExpiryInDays": 7
-  },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
+  "email": "tasnem@gmail.com",
+  "password": "123456789Tasnem"
 }
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'POST' \
+  'https://localhost:7182/api/Auth/login' \
+  -H 'accept: text/plain' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "email": "tasnem@gmail.com",
+  "password": "123456789Tasnem"
+}'
+Request URL
+https://localhost:7182/api/Auth/login
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI4IiwiZW1haWwiOiJ0YXNuZW1AZ21haWwuY29tIiwidW5pcXVlX25hbWUiOiJUYXNuZW0gQXltYW4iLCJyb2xlIjoiVXNlciIsIm5iZiI6MTc2NDE0NDAzMSwiZXhwIjoxNzY0NzQ4ODMxLCJpYXQiOjE3NjQxNDQwMzEsImlzcyI6Ikd5bUJvb2tpbmdBUEkiLCJhdWQiOiJHeW1Cb29raW5nQ2xpZW50cyJ9.Wtcu3Sg4N0BLT65vt9ubMyBIMIk7TwB8PE5QYoStf1E",
+  "user": {
+    "id": 8,
+    "name": "Tasnem Ayman",
+    "email": "tasnem@gmail.com",
+    "phone": "01287135598",
+    "createdAt": "2025-11-25T07:25:04.8546594",
+    "membership": {
+      "id": 7,
+      "type": "Premium Yearly Plan",
+      "startDate": "2025-11-25T07:27:31.1356775",
+      "endDate": "2026-11-25T07:27:31.1357575",
+      "totalHours": 40,
+      "remainingHours": 39,
+      "status": "Active",
+      "pricePaid": 0
+    }
+  }
+}
+Response headers
+ access-control-allow-origin: * 
+ content-type: application/json; charset=utf-8 
+ date: Wed,26 Nov 2025 08:00:31 GMT 
+ server: Kestrel 
+Responses
+Code	Description	Links
+200	
+OK
+
+Media type
+
+text/plain
+Controls Accept header.
+Example Value
+Schema
+{
+  "token": "string",
+  "user": {
+    "id": 0,
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "createdAt": "2025-11-26T08:00:31.768Z",
+    "membership": {
+      "id": 0,
+      "type": "string",
+      "startDate": "2025-11-26T08:00:31.768Z",
+      "endDate": "2025-11-26T08:00:31.768Z",
+      "totalHours": 0,
+      "remainingHours": 0,
+      "status": "string",
+      "pricePaid": 0
+    }
+  }
+}   
 
 
+
+
+/// the login page doesn't work even that it works in backend , but in the frontend it doesn't work whatever i logged in with it says login successfully and doesn't redirect to user dashboard

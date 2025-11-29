@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using elite.Data;
 
@@ -11,9 +12,11 @@ using elite.Data;
 namespace elite.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    partial class GymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250929121927_ChangeDurationToMinutes")]
+    partial class ChangeDurationToMinutes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -463,39 +466,6 @@ namespace elite.Migrations
                     b.ToTable("Promotions");
                 });
 
-            modelBuilder.Entity("elite.Models.PromotionUsage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("DiscountApplied")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OrderAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("PromotionId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("PromotionId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("PromotionUsages");
-                });
-
             modelBuilder.Entity("elite.Models.Trainer", b =>
                 {
                     b.Property<int>("Id")
@@ -703,25 +673,6 @@ namespace elite.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("elite.Models.PromotionUsage", b =>
-                {
-                    b.HasOne("elite.Models.Promotion", "Promotion")
-                        .WithMany("PromotionUsages")
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("elite.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Promotion");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("elite.Models.Class", b =>
                 {
                     b.Navigation("Schedules");
@@ -750,11 +701,6 @@ namespace elite.Migrations
             modelBuilder.Entity("elite.Models.Product", b =>
                 {
                     b.Navigation("OrderItems");
-                });
-
-            modelBuilder.Entity("elite.Models.Promotion", b =>
-                {
-                    b.Navigation("PromotionUsages");
                 });
 
             modelBuilder.Entity("elite.Models.Trainer", b =>

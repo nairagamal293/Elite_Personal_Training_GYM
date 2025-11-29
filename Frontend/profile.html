@@ -9,18 +9,22 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
         /* Global Styles */
         :root {
-            --primary-color: #800020;      /* Burgundy */
-            --secondary-color: #a52a2a;     /* Lighter Burgundy */
-            --accent-color: #e6b8af;        /* Light Burgundy Accent */
-            --dark-color: #212529;
-            --light-color: #f8f9fa;
-            --text-dark: #333;
-            --text-light: #666;
+            --primary-color: #5E60CE;      /* Modern Indigo */
+            --secondary-color: #5390D9;    /* Lighter Blue */
+            --accent-color: #48BFE3;       /* Teal Accent */
+            --dark-color: #0B132B;         /* Deep Dark Blue */
+            --light-color: #F8F9FA;
+            --text-dark: #0B132B;
+            --text-light: #5E6472;
+            --card-bg: #ffffff;
+            --section-bg: #F8F9FA;
+            --gradient-1: linear-gradient(135deg, #5E60CE 0%, #5390D9 100%);
+            --gradient-2: linear-gradient(135deg, #48BFE3 0%, #5E60CE 100%);
         }
         
         * {
@@ -32,22 +36,30 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
-            background-color: #fff;
+            background-color: var(--section-bg);
             overflow-x: hidden;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
         }
         
         /* Navbar Styles */
         .navbar {
             background-color: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
             padding: 15px 0;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand {
             font-weight: 700;
             font-size: 1.8rem;
             color: var(--primary-color) !important;
+            font-family: 'Playfair Display', serif;
         }
         
         .navbar-nav .nav-link {
@@ -70,6 +82,7 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+            background: var(--gradient-1);
             transition: all 0.3s ease;
         }
         
@@ -77,29 +90,98 @@
             width: 70%;
         }
         
+        /* Page Header */
+        .page-header {
+            background: var(--gradient-1);
+            background-image: url("images/cta-bg.jpg");
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+            z-index: 0;
+        }
+        
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        
+        /* Main Content Container */
+        .main-content {
+            background-color: #fff;
+            border-radius: 20px;
+            margin: -50px auto 80px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 10;
+        }
+        
         /* Sidebar Styles */
         .sidebar {
-            background-color: #f8f0f3 !important;
+            background-color: var(--light-color) !important;
             min-height: calc(100vh - 76px);
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            border-radius: 0 20px 20px 0;
+            margin-right: 20px;
+            position: relative;
+        }
+        
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 0 20px 20px 0;
         }
         
         .sidebar .nav-link {
             color: var(--text-dark) !important;
             padding: 12px 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 5px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         
         .sidebar .nav-link:hover {
             background-color: var(--accent-color);
-            color: var(--primary-color) !important;
+            color: white !important;
+            transform: translateX(5px);
         }
         
         .sidebar .nav-link.active {
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             color: #fff !important;
+            box-shadow: 0 4px 10px rgba(94, 96, 206, 0.3);
         }
         
         .sidebar-heading {
@@ -108,84 +190,115 @@
             color: var(--text-light);
             padding: 10px 15px;
             margin-top: 20px;
-        }
-        
-        /* Main Content Styles */
-        main {
-            background-color: #fff;
-            min-height: calc(100vh - 76px);
-            padding: 30px 20px;
+            font-weight: 600;
         }
         
         /* Card Styles */
         .card {
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border: 1px solid #f0f0f0;
-            transition: all 0.3s ease;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: all 0.4s ease;
             margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover::before {
+            transform: scaleX(1);
         }
         
         .card:hover {
-            box-shadow: 0 15px 30px rgba(128, 0, 32, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(72, 191, 227, 0.15);
         }
         
         .card-header {
-            background-color: var(--accent-color);
-            border-bottom: 1px solid var(--primary-color);
+            background: var(--gradient-1);
+            border-bottom: none;
             font-weight: 600;
-            color: var(--primary-color);
-            border-radius: 10px 10px 0 0 !important;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px 20px;
         }
         
         /* Button Styles */
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background: var(--gradient-2);
+            border: none;
             border-radius: 30px;
-            padding: 8px 20px;
-            font-weight: 500;
+            padding: 10px 20px;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(72, 191, 227, 0.2);
         }
         
         .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
             transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(72, 191, 227, 0.3);
+            color: white;
         }
         
         .btn-outline-primary {
             color: var(--primary-color);
-            border-color: var(--primary-color);
+            border: 2px solid var(--primary-color);
             border-radius: 30px;
             padding: 8px 20px;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
         
         .btn-outline-primary:hover {
-            background-color: var(--primary-color);
-            color: #fff;
+            background: var(--gradient-1);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .btn-outline-light {
+            color: white;
+            border: 2px solid white;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            background: white;
+            color: var(--primary-color);
             transform: translateY(-3px);
         }
         
         /* Form Styles */
         .form-control, .form-select {
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            padding: 12px 15px;
             transition: all 0.3s ease;
         }
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(128, 0, 32, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(94, 96, 206, 0.25);
         }
         
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-dark);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         /* Profile Picture Styles */
@@ -193,21 +306,74 @@
             width: 150px;
             height: 150px;
             object-fit: cover;
-            border: 3px solid var(--accent-color);
+            border: 4px solid var(--accent-color);
+            border-radius: 50%;
             transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(72, 191, 227, 0.2);
         }
         
         .profile-picture:hover {
             transform: scale(1.05);
             border-color: var(--primary-color);
+            box-shadow: 0 15px 30px rgba(94, 96, 206, 0.3);
         }
         
-        /* Footer Styles */
+        /* Alert Styles */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-weight: 500;
+        }
+        
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .alert-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+            border-left: 4px solid #2196f3;
+        }
+        
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: var(--gradient-1);
+            border-bottom: none;
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        /* Footer */
         footer {
-            background-color: var(--dark-color);
+            background: linear-gradient(135deg, #0B132B 0%, #1C2541 100%);
             color: white;
             padding: 70px 0 20px;
-            margin-top: 50px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
         }
         
         .footer-title {
@@ -215,11 +381,15 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: white;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-text {
             margin-bottom: 20px;
-            color: #ccc;
+            color: #cccccc;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a {
@@ -233,16 +403,21 @@
             margin-right: 10px;
             color: white;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
         
         .social-icons a:hover {
-            background-color: var(--primary-color);
+            background: var(--gradient-1);
             transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.4);
         }
         
         .footer-links {
             list-style: none;
             padding: 0;
+            position: relative;
+            z-index: 1;
         }
         
         .footer-links li {
@@ -250,14 +425,31 @@
         }
         
         .footer-links a {
-            color: #ccc;
+            color: #cccccc;
             text-decoration: none;
             transition: all 0.3s ease;
+            display: inline-block;
         }
         
         .footer-links a:hover {
-            color: var(--primary-color);
+            color: white;
             padding-left: 5px;
+        }
+        
+        .contact-info {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .contact-info p {
+            margin-bottom: 10px;
+            color: #cccccc;
+        }
+        
+        .contact-info i {
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-size: 1.1rem;
         }
         
         .copyright {
@@ -265,31 +457,9 @@
             padding-top: 30px;
             margin-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ccc;
-        }
-        
-        /* Alert Styles */
-        .alert {
-            border: none;
-            border-radius: 8px;
-        }
-        
-        .alert-warning {
-            background-color: rgba(255, 152, 0, 0.1);
-            color: #ff9800;
-        }
-        
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 10px;
-            border: none;
-        }
-        
-        .modal-header {
-            background-color: var(--accent-color);
-            border-bottom: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            border-radius: 10px 10px 0 0;
+            color: #999999;
+            position: relative;
+            z-index: 1;
         }
         
         /* Responsive Adjustments */
@@ -310,6 +480,36 @@
             
             main {
                 margin-left: 0 !important;
+            }
+            
+            .main-content {
+                margin: -30px 15px 50px;
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 80px 0;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .main-content {
+                margin: -20px 10px 40px;
+                padding: 20px 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                font-size: 1.9rem;
+            }
+            
+            .sidebar .card-body {
+                padding: 15px;
             }
         }
     </style>
@@ -369,8 +569,16 @@
         </div>
     </nav>
     
-    <!-- Dashboard Sidebar and Content -->
-    <div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title">My Profile</h1>
+            <p>Manage your personal information and account settings</p>
+        </div>
+    </div>
+    
+    <!-- Main Content Container -->
+    <div class="container main-content">
         <div class="row">
             <!-- Sidebar -->
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
@@ -446,8 +654,8 @@
                 </div>
             </nav>
             
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Main Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-9 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">My Profile</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
@@ -465,11 +673,11 @@
                         <div class="card mb-4">
                             <div class="card-body text-center">
                                 <div class="mb-3">
-                                    <img src="https://images.unsplash.com/photo-1494790108755-27c6bc77a295?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" class="rounded-circle profile-picture" alt="Profile Picture">
+                                    <img src="images/icon-7797704_640.png" class="rounded-circle profile-picture" alt="Profile Picture">
                                 </div>
                                 <h5 id="profile-name">Loading...</h5>
                                 <p class="text-muted" id="profile-email">Loading...</p>
-                                <button class="btn btn-outline-primary btn-sm mt-2">Change Photo</button>
+                                <button class="btn btn-outline-primary btn-sm mt-2" id="change-photo-btn">Change Photo</button>
                             </div>
                         </div>
                         
@@ -499,42 +707,35 @@
                             </div>
                             <div class="card-body">
                                 <form id="profile-form">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="first-name" class="form-label">First Name</label>
-                                            <input type="text" class="form-control" id="first-name" required>
-                                            <div class="invalid-feedback"></div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="last-name" class="form-label">Last Name</label>
-                                            <input type="text" class="form-control" id="last-name" required>
-                                            <div class="invalid-feedback"></div>
-                                        </div>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                        <div class="invalid-feedback">Please enter your name</div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" required>
-                                        <div class="invalid-feedback"></div>
+                                        <input type="email" class="form-control" id="email" name="email" readonly>
+                                        <div class="form-text">Email cannot be changed</div>
                                     </div>
                                     <div class="mb-3">
                                         <label for="phone" class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" id="phone" placeholder="(123) 456-7890">
+                                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="(123) 456-7890">
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     
-                                    <h6 class="mt-4 mb-3">Address Information</h6>
+                                    <h6 class="mt-4 mb-3">Additional Information (Optional)</h6>
                                     <div class="mb-3">
                                         <label for="address" class="form-label">Street Address</label>
-                                        <input type="text" class="form-control" id="address">
+                                        <input type="text" class="form-control" id="address" name="address">
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="city" class="form-label">City</label>
-                                            <input type="text" class="form-control" id="city">
+                                            <input type="text" class="form-control" id="city" name="city">
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label for="state" class="form-label">State</label>
-                                            <select class="form-select" id="state">
+                                            <select class="form-select" id="state" name="state">
                                                 <option value="">Select State</option>
                                                 <option value="AL">Alabama</option>
                                                 <option value="AK">Alaska</option>
@@ -590,18 +791,18 @@
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label for="zip" class="form-label">ZIP Code</label>
-                                            <input type="text" class="form-control" id="zip">
+                                            <input type="text" class="form-control" id="zip" name="zip">
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3">
                                         <label for="emergency-contact" class="form-label">Emergency Contact</label>
-                                        <input type="text" class="form-control" id="emergency-contact" placeholder="Name and phone number">
+                                        <input type="text" class="form-control" id="emergency-contact" name="emergency-contact" placeholder="Name and phone number">
                                     </div>
                                     
                                     <div class="mb-3">
                                         <label for="medical-conditions" class="form-label">Medical Conditions (Optional)</label>
-                                        <textarea class="form-control" id="medical-conditions" rows="2" placeholder="List any medical conditions our trainers should be aware of"></textarea>
+                                        <textarea class="form-control" id="medical-conditions" name="medical-conditions" rows="2" placeholder="List any medical conditions our trainers should be aware of"></textarea>
                                     </div>
                                 </form>
                             </div>
@@ -624,19 +825,19 @@
                     <form id="change-password-form">
                         <div class="mb-3">
                             <label for="current-password" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" id="current-password" required>
-                            <div class="invalid-feedback"></div>
+                            <input type="password" class="form-control" id="current-password" name="current-password" required>
+                            <div class="invalid-feedback">Please enter your current password</div>
                         </div>
                         <div class="mb-3">
                             <label for="new-password" class="form-label">New Password</label>
-                            <input type="password" class="form-control" id="new-password" required>
-                            <div class="invalid-feedback"></div>
+                            <input type="password" class="form-control" id="new-password" name="new-password" required>
+                            <div class="invalid-feedback">Password must be at least 6 characters</div>
                             <div class="form-text">Password must be at least 6 characters long</div>
                         </div>
                         <div class="mb-3">
                             <label for="confirm-password" class="form-label">Confirm New Password</label>
-                            <input type="password" class="form-control" id="confirm-password" required>
-                            <div class="invalid-feedback"></div>
+                            <input type="password" class="form-control" id="confirm-password" name="confirm-password" required>
+                            <div class="invalid-feedback">Passwords do not match</div>
                         </div>
                     </form>
                 </div>
@@ -723,12 +924,7 @@
                     profileEmail.textContent = userProfile.email;
                     
                     // Populate form fields
-                    if (userProfile.name) {
-                        const nameParts = userProfile.name.split(' ');
-                        document.getElementById('first-name').value = nameParts[0] || '';
-                        document.getElementById('last-name').value = nameParts.slice(1).join(' ') || '';
-                    }
-                    
+                    document.getElementById('name').value = userProfile.name || '';
                     document.getElementById('email').value = userProfile.email || '';
                     document.getElementById('phone').value = userProfile.phone || '';
                     
@@ -749,14 +945,22 @@
                 
                 try {
                     const updateData = {
-                        name: `${document.getElementById('first-name').value} ${document.getElementById('last-name').value}`.trim(),
+                        name: document.getElementById('name').value.trim(),
                         phone: document.getElementById('phone').value
                     };
                     
-                    await authService.updateUserProfile(user.id, updateData);
+                    // Use the correct method - either from authService or apiService
+                    if (authService.updateUserProfile) {
+                        await authService.updateUserProfile(updateData);
+                    } else if (apiService.updateUserProfile) {
+                        await apiService.updateUserProfile(updateData);
+                    } else {
+                        throw new Error('Profile update method not available');
+                    }
                     
                     // Update profile display
                     profileName.textContent = updateData.name;
+                    document.getElementById('nav-username').textContent = updateData.name;
                     
                     // Show success message
                     uiHelper.showAlert('Profile updated successfully!', 'success');
@@ -772,6 +976,7 @@
             
             // Change password
             changePasswordBtn.addEventListener('click', function() {
+                changePasswordForm.reset();
                 changePasswordModal.show();
             });
             
@@ -790,7 +995,14 @@
                     const currentPassword = document.getElementById('current-password').value;
                     const newPassword = document.getElementById('new-password').value;
                     
-                    await authService.changePassword(user.id, currentPassword, newPassword);
+                    // Use the correct method - either from authService or apiService
+                    if (authService.changePassword) {
+                        await authService.changePassword(currentPassword, newPassword);
+                    } else if (apiService.changePassword) {
+                        await apiService.changePassword(currentPassword, newPassword);
+                    } else {
+                        throw new Error('Password change method not available');
+                    }
                     
                     // Show success message
                     uiHelper.showAlert('Password changed successfully!', 'success');
@@ -812,6 +1024,15 @@
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 authService.logout();
+            });
+            
+            // Form validation on input
+            profileForm.addEventListener('input', function(e) {
+                formValidator.clearFieldError(e.target);
+            });
+            
+            changePasswordForm.addEventListener('input', function(e) {
+                formValidator.clearFieldError(e.target);
             });
             
             // Initial load

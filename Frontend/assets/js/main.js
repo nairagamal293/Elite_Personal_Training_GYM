@@ -27,10 +27,22 @@ const apiService = {
     // Base URL for API - change this to your actual API URL
     baseUrl: 'https://localhost:7182/api',
     
-    // Generic request function
-   // In apiService object
 async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
+    
+    // Debug: Check authentication
+    const token = localStorage.getItem('authToken');
+    console.log('🔐 Auth Token:', token ? 'Present' : 'Missing');
+    if (token) {
+        console.log('🔐 Token length:', token.length);
+        // You can also decode the token to see its contents
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log('🔐 Token payload:', payload);
+        } catch (e) {
+            console.log('🔐 Could not decode token');
+        }
+    }
     
     // For FormData, don't set Content-Type header, let the browser set it
     const isFormData = options.body instanceof FormData;
@@ -42,7 +54,6 @@ async request(endpoint, options = {}) {
     };
     
     // Add authorization header if token exists
-    const token = localStorage.getItem('authToken');
     if (token) {
         defaultOptions.headers.Authorization = `Bearer ${token}`;
     }
@@ -57,46 +68,40 @@ async request(endpoint, options = {}) {
     };
     
     try {
-        console.log(`Making ${finalOptions.method || 'GET'} request to:`, url);
-        if (finalOptions.body) {
-            console.log('Request body:', finalOptions.body);
-        }
+        console.log(`🌐 Making ${finalOptions.method || 'GET'} request to:`, url);
+        console.log('🌐 Headers:', finalOptions.headers);
         
         const response = await fetch(url, finalOptions);
         
-        // Log response status
-        console.log('Response status:', response.status);
+        // Log response status and headers
+        console.log('🌐 Response status:', response.status);
+        console.log('🌐 Response headers:', Object.fromEntries(response.headers.entries()));
         
-        // Handle non-JSON responses (like 404, 500 errors)
         if (!response.ok) {
             let errorData;
             let responseText;
             
             try {
-                // Try to parse as JSON first
                 responseText = await response.text();
+                console.log('🌐 Response text:', responseText);
                 errorData = JSON.parse(responseText);
-                console.error('Error response data:', errorData);
             } catch (e) {
-                // If we can't parse the error response as JSON, create a generic error
-                console.error('Could not parse error response as JSON:', e);
                 errorData = {
                     message: `HTTP error! status: ${response.status}`,
                     status: response.status
                 };
             }
             
-            // Create a more detailed error object
             const error = new Error(errorData.message || `HTTP error! status: ${response.status}`);
             error.status = response.status;
-            error.errors = errorData.errors; // Pass through validation errors
+            error.errors = errorData.errors;
             
             throw error;
         }
         
         return await response.json();
     } catch (error) {
-        console.error('API request failed:', error);
+        console.error('❌ API request failed:', error);
         throw error;
     }
 },
@@ -117,14 +122,14 @@ async request(endpoint, options = {}) {
     },
     
     // User methods
-    async getUserProfile() {
-        return this.request('/users/profile');
-    },
+ async getUserProfile() {
+    return this.request('/auth/profile'); // Changed from '/users/profile'
+},
     
     // Membership methods
-    async getUserMembership() {
-        return this.request('/memberships');
-    },
+ async getUserMembership() {
+    return this.request('/memberships');
+},
     
     async purchaseMembership(membershipData) {
         return this.request('/memberships', {
@@ -380,9 +385,9 @@ async updateTrainer(id, trainerData, imageFile = null) {
         return this.request(`/bookings/${bookingId}`);
     },
     
-    async getUserBookings() {
-        return this.request('/bookings');
-    },
+   async getUserBookings() {
+    return this.request('/bookings');
+},
     
     async cancelBooking(bookingId) {
         return this.request(`/bookings/${bookingId}`, {
@@ -475,9 +480,10 @@ async updateProduct(id, productData, imageFile = null, existingImageUrl = null) 
         });
     },
     
-    async getUserOrders() {
-        return this.request('/orders');
-    },
+// Fix the getUserOrders method in apiService
+async getUserOrders() {
+    return this.request('/orders/user'); // Changed to user-specific endpoint
+},
     
     async getOrderById(id) {
         return this.request(`/orders/${id}`);
@@ -535,6 +541,12 @@ async updateProduct(id, productData, imageFile = null, existingImageUrl = null) 
             body: JSON.stringify({ code, orderAmount })
         });
     },
+    async calculateDiscount(code, orderAmount) {
+    return this.request('/orders/apply-promotion', {
+        method: 'POST',
+        body: JSON.stringify({ code, orderAmount })
+    });
+},
     
     // Admin methods
     async getDashboardStats() {
@@ -579,30 +591,24 @@ const authService = {
         return userJson ? JSON.parse(userJson) : null;
     },
     
-    // Check if user is admin - improved to parse JWT token correctly
+    // Check if user is admin
     isAdmin() {
         const token = localStorage.getItem('authToken');
         if (!token) return false;
         
         try {
-            // Parse the JWT token to get the claims
             const parts = token.split('.');
             if (parts.length !== 3) return false;
             
-            // Get the payload part and convert base64url to base64
             const payloadBase64Url = parts[1];
             let payloadBase64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
             
-            // Add padding if needed
             while (payloadBase64.length % 4) {
                 payloadBase64 += '=';
             }
             
-            // Parse the payload
             const payload = JSON.parse(atob(payloadBase64));
             
-            // Check if the token contains an Admin role claim
-            // Try different possible claim names
             const roleClaim1 = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
             const roleClaim2 = payload['role'];
             const roleClaim3 = payload['Role'];
@@ -625,6 +631,47 @@ const authService = {
     saveAuthData(token, user) {
         localStorage.setItem('authToken', token);
         localStorage.setItem('currentUser', JSON.stringify(user));
+    },
+
+     // NEW: Update user profile
+    async updateUserProfile(profileData) {
+        try {
+            const response = await apiService.request('/auth/profile', {
+                method: 'PUT',
+                body: JSON.stringify(profileData)
+            });
+            
+            // Update local user data
+            const currentUser = this.getCurrentUser();
+            if (currentUser) {
+                if (profileData.name) currentUser.name = profileData.name;
+                if (profileData.phone) currentUser.phone = profileData.phone;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            throw error;
+        }
+    },
+    
+    // NEW: Change password
+    async changePassword(currentPassword, newPassword) {
+        try {
+            const response = await apiService.request('/auth/change-password', {
+                method: 'POST',
+                body: JSON.stringify({
+                    currentPassword,
+                    newPassword
+                })
+            });
+            
+            return response;
+        } catch (error) {
+            console.error('Error changing password:', error);
+            throw error;
+        }
     }
 };
 

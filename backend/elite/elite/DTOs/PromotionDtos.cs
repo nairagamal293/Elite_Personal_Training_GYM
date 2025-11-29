@@ -39,6 +39,7 @@ namespace elite.DTOs
         public int UsageLimit { get; set; } = 100;
     }
 
+    // DTOs/ApplyPromotionDto.cs
     public class ApplyPromotionDto
     {
         [Required]
@@ -46,5 +47,6 @@ namespace elite.DTOs
 
         [Required]
         public decimal OrderAmount { get; set; }
+
     }
 }

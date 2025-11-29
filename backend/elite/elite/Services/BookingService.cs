@@ -17,18 +17,22 @@ namespace elite.Services
             _logger = logger;
         }
 
+        // Services/BookingService.cs
         public async Task<BookingResponseDto> CreateBookingAsync(CreateBookingDto bookingDto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
+                // Validate user exists
                 var user = await _context.Users
                     .Include(u => u.Membership)
                     .FirstOrDefaultAsync(u => u.Id == bookingDto.UserId);
 
-                if (user == null) throw new ArgumentException("User not found");
+                if (user == null)
+                    throw new ArgumentException("User not found");
 
+                // Validate membership
                 if (user.Membership == null || user.Membership.Status != "Active")
                     throw new InvalidOperationException("User does not have an active membership");
 
@@ -39,7 +43,7 @@ namespace elite.Services
                     throw new InvalidOperationException("Membership has expired");
                 }
 
-                decimal duration = 0;
+                decimal durationHours = 0;
                 string className = string.Empty;
                 string trainerName = string.Empty;
                 DateTime startTime, endTime;
@@ -47,66 +51,95 @@ namespace elite.Services
 
                 if (bookingDto.Type == "Class")
                 {
+                    // Get class schedule with related data
                     var schedule = await _context.ClassSchedules
                         .Include(cs => cs.Class)
                         .ThenInclude(c => c.Trainer)
                         .FirstOrDefaultAsync(cs => cs.Id == bookingDto.ScheduleId);
 
-                    if (schedule == null) throw new ArgumentException("Class schedule not found");
-                    if (schedule.AvailableSlots <= 0) throw new InvalidOperationException("No available slots");
-                    if (schedule.StartTime <= DateTime.UtcNow) throw new InvalidOperationException("Class has already started");
+                    if (schedule == null)
+                        throw new ArgumentException("Class schedule not found");
 
-                    // FIX: Convert minutes to hours
-                    duration = schedule.Class.Duration / 60.0m;
+                    if (schedule.AvailableSlots <= 0)
+                        throw new InvalidOperationException("No available slots for this class");
+
+                    if (schedule.StartTime <= DateTime.UtcNow)
+                        throw new InvalidOperationException("Class has already started");
+
+                    // Convert duration from minutes to hours for membership calculation
+                    durationHours = schedule.Class.Duration / 60.0m;
                     className = schedule.Class.Name;
                     trainerName = schedule.Class.Trainer.Name;
                     startTime = schedule.StartTime;
                     endTime = schedule.EndTime;
                     location = schedule.Location;
 
+                    // Check for duplicate booking
                     var existingBooking = await _context.Bookings
                         .FirstOrDefaultAsync(b => b.UserId == bookingDto.UserId &&
                                                  b.Type == "Class" &&
                                                  b.ScheduleId == bookingDto.ScheduleId &&
                                                  b.Status == "Confirmed");
 
-                    if (existingBooking != null) throw new InvalidOperationException("User already booked this class");
+                    if (existingBooking != null)
+                        throw new InvalidOperationException("User already booked this class");
 
+                    // Decrement available slots
                     schedule.AvailableSlots--;
                     _context.ClassSchedules.Update(schedule);
                 }
                 else if (bookingDto.Type == "OnlineSession")
                 {
+                    // Get online session schedule with related data
                     var schedule = await _context.OnlineSessionSchedules
                         .Include(oss => oss.OnlineSession)
                         .ThenInclude(os => os.Trainer)
                         .FirstOrDefaultAsync(oss => oss.Id == bookingDto.ScheduleId);
 
-                    if (schedule == null) throw new ArgumentException("Online session schedule not found");
-                    if (schedule.AvailableSlots <= 0) throw new InvalidOperationException("No available slots");
-                    if (schedule.StartTime <= DateTime.UtcNow) throw new InvalidOperationException("Session has already started");
+                    if (schedule == null)
+                        throw new ArgumentException("Online session schedule not found");
 
-                    // FIX: Convert minutes to hours
-                    duration = schedule.OnlineSession.Duration / 60.0m;
+                    if (schedule.AvailableSlots <= 0)
+                        throw new InvalidOperationException("No available slots for this session");
+
+                    if (schedule.StartTime <= DateTime.UtcNow)
+                        throw new InvalidOperationException("Session has already started");
+
+                    // Convert duration from minutes to hours for membership calculation
+                    durationHours = schedule.OnlineSession.Duration / 60.0m;
                     className = schedule.OnlineSession.Name;
                     trainerName = schedule.OnlineSession.Trainer.Name;
                     startTime = schedule.StartTime;
                     endTime = schedule.EndTime;
 
+                    // Check for duplicate booking
+                    var existingBooking = await _context.Bookings
+                        .FirstOrDefaultAsync(b => b.UserId == bookingDto.UserId &&
+                                                 b.Type == "OnlineSession" &&
+                                                 b.ScheduleId == bookingDto.ScheduleId &&
+                                                 b.Status == "Confirmed");
+
+                    if (existingBooking != null)
+                        throw new InvalidOperationException("User already booked this session");
+
+                    // Decrement available slots
                     schedule.AvailableSlots--;
                     _context.OnlineSessionSchedules.Update(schedule);
                 }
                 else
                 {
-                    throw new ArgumentException("Invalid booking type");
+                    throw new ArgumentException("Invalid booking type. Must be 'Class' or 'OnlineSession'");
                 }
 
-                if (user.Membership.RemainingHours < duration)
-                    throw new InvalidOperationException("Insufficient hours in membership");
+                // Check if user has enough hours remaining
+                if (user.Membership.RemainingHours < durationHours)
+                    throw new InvalidOperationException($"Insufficient hours in membership. Required: {durationHours} hours, Available: {user.Membership.RemainingHours} hours");
 
-                user.Membership.RemainingHours -= duration;
+                // Deduct hours from membership
+                user.Membership.RemainingHours -= durationHours;
                 _context.Memberships.Update(user.Membership);
 
+                // Create the booking
                 var booking = new Booking
                 {
                     UserId = bookingDto.UserId,
@@ -114,13 +147,15 @@ namespace elite.Services
                     ScheduleId = bookingDto.ScheduleId,
                     BookingDate = DateTime.UtcNow,
                     Status = "Confirmed",
-                    HoursConsumed = duration
+                    HoursConsumed = durationHours
                 };
 
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
+                // Return the booking details
                 return new BookingResponseDto
                 {
                     Id = booking.Id,
@@ -139,7 +174,8 @@ namespace elite.Services
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error creating booking");
+                _logger.LogError(ex, "Error creating booking for user {UserId}, schedule {ScheduleId}",
+                    bookingDto.UserId, bookingDto.ScheduleId);
                 throw;
             }
         }

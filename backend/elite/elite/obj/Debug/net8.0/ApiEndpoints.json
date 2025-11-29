@@ -116,6 +116,22 @@
   },
   {
     "ContainingType": "elite.Controllers.AuthController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/Auth/change-password",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "changePasswordDto",
+        "Type": "elite.DTOs.ChangePasswordDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "elite.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
     "HttpMethod": "POST",
@@ -139,6 +155,42 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "elite.Controllers.AuthController",
+    "Method": "GetProfile",
+    "RelativePath": "api/Auth/profile",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "elite.DTOs.UserResponseDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "elite.Controllers.AuthController",
+    "Method": "UpdateProfile",
+    "RelativePath": "api/Auth/profile",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "updateDto",
+        "Type": "elite.DTOs.UserUpdateDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "elite.Controllers.AuthController",
@@ -702,6 +754,16 @@
   {
     "ContainingType": "elite.Controllers.OrdersController",
     "Method": "GetUserOrders",
+    "RelativePath": "api/Orders/user",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "elite.Controllers.OrdersController",
+    "Method": "GetUserOrders",
     "RelativePath": "api/Orders/user/{userId}",
     "HttpMethod": "GET",
     "IsController": true,
@@ -983,8 +1045,40 @@
   },
   {
     "ContainingType": "elite.Controllers.PromotionsController",
+    "Method": "HasUserUsedPromotion",
+    "RelativePath": "api/Promotions/has-used/{promotionId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "promotionId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "elite.Controllers.PromotionsController",
     "Method": "ValidatePromotion",
     "RelativePath": "api/Promotions/validate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "applyPromotionDto",
+        "Type": "elite.DTOs.ApplyPromotionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "elite.Controllers.PromotionsController",
+    "Method": "ValidatePromotionAuthenticated",
+    "RelativePath": "api/Promotions/validate-authenticated",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

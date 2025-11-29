@@ -24,6 +24,7 @@ namespace elite.Data
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<MembershipType> MembershipTypes { get; set; }
+        public DbSet<PromotionUsage> PromotionUsages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -40,6 +41,24 @@ namespace elite.Data
 
             modelBuilder.Entity<ClassSchedule>()
                 .HasCheckConstraint("CK_ClassSchedule_AvailableSlots", "[AvailableSlots] >= 0");
+
+            // Configure PromotionUsage relationships
+            modelBuilder.Entity<PromotionUsage>()
+                .HasOne(pu => pu.Promotion)
+                .WithMany(p => p.PromotionUsages)
+                .HasForeignKey(pu => pu.PromotionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PromotionUsage>()
+                .HasOne(pu => pu.User)
+                .WithMany()
+                .HasForeignKey(pu => pu.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Ensure a user can only use a promotion once
+            modelBuilder.Entity<PromotionUsage>()
+                .HasIndex(pu => new { pu.PromotionId, pu.UserId })
+                .IsUnique();
 
             // Seed data
             modelBuilder.Entity<Trainer>().HasData(

@@ -61,7 +61,9 @@ namespace elite.Services
                 {
                     try
                     {
-                        discount = await _promotionService.CalculateDiscountAsync(orderCreateDto.PromotionCode, totalAmount);
+                        // Pass userId to promotion service
+                        discount = await _promotionService.CalculateDiscountAsync(
+                            orderCreateDto.PromotionCode, totalAmount, orderCreateDto.UserId);
                         totalAmount -= discount;
                     }
                     catch (Exception ex)
@@ -100,6 +102,7 @@ namespace elite.Services
                 throw;
             }
         }
+
 
         public async Task<OrderDto> GetOrderByIdAsync(int id)
         {
@@ -233,9 +236,14 @@ namespace elite.Services
             }
         }
 
-        public async Task<decimal> ApplyPromotionAsync(string code, decimal orderAmount)
+        public async Task<decimal> ApplyPromotionAsync(string code, decimal orderAmount, int userId)
         {
-            return await _promotionService.CalculateDiscountAsync(code, orderAmount);
+            return await _promotionService.CalculateDiscountAsync(code, orderAmount, userId);
+        }
+
+        public Task<decimal> ApplyPromotionAsync(string code, decimal orderAmount)
+        {
+            throw new NotImplementedException();
         }
     }
 }

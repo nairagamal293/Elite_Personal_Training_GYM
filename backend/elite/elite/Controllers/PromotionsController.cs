@@ -1,11 +1,12 @@
-﻿using elite.DTOs;
+﻿// Controllers/PromotionsController.cs
+using elite.DTOs;
 using elite.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace elite.Controllers
 {
-    // Controllers/PromotionsController.cs
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Roles = "Admin")]
@@ -136,12 +137,50 @@ namespace elite.Controllers
         {
             try
             {
-                var isValid = await _promotionService.ValidatePromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount);
+                // For anonymous validation, we'll use a dummy userId or make userId optional
+                // Since this is a public endpoint, we'll create an overload that doesn't require userId
+                var isValid = await _promotionService.ValidatePromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount, 0);
                 return Ok(new { isValid });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating promotion");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        // Add a new endpoint for authenticated users to validate promotions
+        [HttpPost("validate-authenticated")]
+        [Authorize]
+        public async Task<IActionResult> ValidatePromotionAuthenticated([FromBody] ApplyPromotionDto applyPromotionDto)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var isValid = await _promotionService.ValidatePromotionAsync(applyPromotionDto.Code, applyPromotionDto.OrderAmount, userId);
+                return Ok(new { isValid });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating promotion");
+                return StatusCode(500, new { message = "Internal server error" });
+            }
+        }
+
+        // Add a new endpoint to check if user has used a promotion
+        [HttpGet("has-used/{promotionId}")]
+        [Authorize]
+        public async Task<IActionResult> HasUserUsedPromotion(int promotionId)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                var hasUsed = await _promotionService.HasUserUsedPromotionAsync(promotionId, userId);
+                return Ok(new { hasUsed });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking promotion usage");
                 return StatusCode(500, new { message = "Internal server error" });
             }
         }
